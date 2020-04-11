@@ -41,6 +41,14 @@ Returns:
     - The location of the minimum
 """
 function optimize(f, g, x0, n, prob)
+
+    # evaluate f(x+ih) to determine grad for free
+    
+
+    # if prob == a
+        #x_history = algo()
+    #else
+    #return last(x_history)
     x_best = x0
     return x_best
 end
