@@ -132,8 +132,9 @@ f = x -> exp(x-2) - x
 ## quadratic fit search
 
 """
-    golden_section_search(f, a, b, n)
-Perform quadratic fit search on `f` in the interval [`a`,`b`] with `n` evaluations.
+    quadratic_fit_search(f, a, b, c, n)
+Perform quadratic fit search on `f` in the interval [`a`,`c`] with `b` ∈ [`a`,`c`]
+with `n` evaluations.
 """
 function quadratic_fit_search(f, a, b, c, n)
 
