@@ -1,5 +1,4 @@
 using Base.MathConstants: φ
-using Plots; pyplot()
 
 ## determining an initial bracket
 
@@ -42,8 +41,9 @@ end
 
 # bracket minimum example
 
-f = x -> x^2
-(l, u) = bracket_minimum(f, 0.2)
+#f = x -> x^2
+#(l, u) = bracket_minimum(f, 0.2)
+
 
 ## fibonacci search
 
@@ -86,8 +86,9 @@ end
 
 # fibonacci search sample function
 
-f = x -> exp(x-2) - x
-(l, u) = fibonacci_search(f, -2, 6, 5)
+#f = x -> exp(x-2) - x
+#(l, u) = fibonacci_search(f, -2, 6, 5)
+
 
 ## golden section search
 
@@ -126,8 +127,9 @@ end
 
 # golden_section_search sample function
 
-f = x -> exp(x-2) - x
-(l, u) = golden_section_search(f, -2, 6, 5)
+#f = x -> exp(x-2) - x
+#(l, u) = golden_section_search(f, -2, 6, 5)
+
 
 ## quadratic fit search
 
@@ -170,11 +172,11 @@ function quadratic_fit_search(f, a, b, c, n)
 
 end
 
-
 # quadratic fit search example
 
-f = x -> exp(x-2) - x
-(l, m, u) = quadratic_fit_search(f, -2, 3, 6, 10)
+#f = x -> exp(x-2) - x
+#(l, m, u) = quadratic_fit_search(f, -2, 3, 6, 10)
+
 
 ## Shubert-Piyavskii method
 
@@ -255,8 +257,8 @@ end
 
 # Shubert Piyavskii search example
 
-f = x -> sin(x)
-f_min, intervals = shubert_piyavskii_search(f, 0.1, 2π, 1, 0.01)
+#f = x -> sin(x)
+#f_min, intervals = shubert_piyavskii_search(f, 0.1, 2π, 1, 0.01)
 
 
 ## bisection method
@@ -318,6 +320,6 @@ function bisection(f′, a, b, ϵ)
 end
 
 # bisection method example
-f′ = x -> 1 - x
-(l, u) = bracket_sign_change(f′, -1, -1.1)
-(l, u) = bisection(f′, l, u, 1e-2)
+#f′ = x -> 1 - x
+#(l, u) = bracket_sign_change(f′, -1, -1.1)
+#(l, u) = bisection(f′, l, u, 1e-2)

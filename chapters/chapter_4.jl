@@ -2,78 +2,9 @@ using Base.MathConstants: φ
 using LinearAlgebra: ⋅
 using Convex, SCS
 
+include("chapter_3.jl")
+
 ## line search
-
-"""
-    bracket_minimum(f, x)
-Determine a suitable initial bracket for a unimodal function `f` given an estimate `x`.
-"""
-function bracket_minimum(f, x=0; s=1e-3, k=2.0)
-
-    # initialize bracket bounds
-    a, ya = x,     f(x)
-    b, yb = a + s, f(a + s)
-
-    # reverse search direction if necessary
-    if yb > ya
-        a,  b  = b,  a
-        ya, yb = yb, ya
-        s = -s
-    end
-
-    # perform bracket expansion
-    while true
-
-        # update bracket bound
-        c, yc = b + s, f(b + s)
-
-        # return if new function value increases
-        if yc > yb
-            return a < c ? (a, c) : (c, a)
-        end
-
-        # update bracket bounds and step size
-        a,  b  = b,  c  # b is a betten bound than a; c is a better bound than b
-        ya, yb = yb, yc
-        s *= k
-
-    end
-
-end
-
-"""
-    golden_section_search(f, a, b, n)
-Perform golden section search on `f` in the interval [`a`,`b`] with `n` evaluations.
-"""
-function golden_section_search(f, a, b, n; ϵ=1e-2)
-
-    # define golden section ratio
-    ρ = φ-1
-
-    # perform first evaluation (at ρ along interval)
-    d  = a + ρ*(b-a)
-    yd = f(d)
-
-    # iterate
-    for i in 1:n-1
-
-        # compute new bound and perform evaluation
-        c  = b - ρ*(b-a)
-        yc = f(c)
-
-        # update bounds
-        if yc < yd
-            b, d, yd = d, c, yc
-        else
-            a, b = b, c
-        end
-
-    end
-
-    return a < b ? (a, b) : (b, a)
-
-end
-
 
 """
     line_search(f, x, d)
@@ -93,10 +24,11 @@ function line_search(f, x, d; n=10)
 end
 
 # line search example
-f(x) = x[1]^2 + x[2]^2
-x = [5., 3.]
-d = [-1., -0.7]
-x = line_search(f, x, d)
+#f(x) = x[1]^2 + x[2]^2
+#x = [5., 3.]
+#d = [-1., -0.7]
+#x = line_search(f, x, d)
+
 
 ## backtracking line search
 
@@ -120,11 +52,11 @@ function backtracking_line_search(f, ∇f, x, d, α; p=0.5, β=1e-4)
 end
 
 # backtracking line search example
-f(x)  =   x[1]^2 +  x[2]^2
-∇f(x) = [2x[1],    2x[2]]
-x = [5., 3.]
-d = [-1., -0.7]
-x = backtracking_line_search(f, ∇f, x, d, 10, β=0.5)
+#f(x)  =   x[1]^2 +  x[2]^2
+#∇f(x) = [2x[1],    2x[2]]
+#x = [5., 3.]
+#d = [-1., -0.7]
+#x = backtracking_line_search(f, ∇f, x, d, 10, β=0.5)
 
 
 ## strong backtracking line search
@@ -193,11 +125,12 @@ function strong_backtracking_line_search(f, ∇f, x, d; α=0.1, β=1e-4, σ=0.1)
 end
 
 # backtracking line search example
-f(x)  =   x[1]^2 +  x[2]^2
-∇f(x) = [2x[1],    2x[2]]
-d = [-1., -0.7]
-x = [5., 3.]
-x = strong_backtracking_line_search(f, ∇f, x, d)
+#f(x)  =   x[1]^2 +  x[2]^2
+#∇f(x) = [2x[1],    2x[2]]
+#d = [-1., -0.7]
+#x = [5., 3.]
+#x = strong_backtracking_line_search(f, ∇f, x, d)
+
 
 ## trust region descent
 
@@ -250,14 +183,14 @@ function trust_region_descent(f, ∇f, ∇²f, x, k_max;
 end
 
 # trust region descent example
-f(x)   =   x[1]^2 + x[2]^2 + x[1]^4 + x[2]^4
-∇f(x)  = [2x[1] + 4x[1]^3, 2x[2] + 4x[2]^3]
-∇²f(x) = [2+12x[1]^2 0;
-          0 2+12x[2]^2]
-∇²f_error(x) = [2+11x[1]^2 0;
-                0 2+11x[2]^2]
-x = [-4., 10.]
-x = trust_region_descent(f, ∇f, ∇²f, x, 15)
+#f(x)   =   x[1]^2 + x[2]^2 + x[1]^4 + x[2]^4
+#∇f(x)  = [2x[1] + 4x[1]^3, 2x[2] + 4x[2]^3]
+#∇²f(x) = [2+12x[1]^2 0;
+#          0 2+12x[2]^2]
+#∇²f_error(x) = [2+11x[1]^2 0;
+#                0 2+11x[2]^2]
+#x = [-4., 10.]
+#x = trust_region_descent(f, ∇f, ∇²f, x, 15)
 
-x = [-4., 10.]
-x = trust_region_descent(f, ∇f, ∇²f_error, x, 15)
+#x = [-4., 10.]
+#x = trust_region_descent(f, ∇f, ∇²f_error, x, 15)
