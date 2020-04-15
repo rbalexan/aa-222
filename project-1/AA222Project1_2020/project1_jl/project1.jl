@@ -1,31 +1,11 @@
-#=
-        project1.jl -- This is where the magic happens!
+using LinearAlgebra
+using Statistics
 
-    All of your code must either live in this file, or be `include`d here.
-=#
+abstract type DescentMethod end
 
-#=
-    If you want to use packages, please do so up here.
-    Note that you may use any packages in the julia standard library
-    (i.e. ones that ship with the julia language) as well as Statistics
-    (since we use it in the backend already anyway)
-=#
-
-# Example:
-# using LinearAlgebra
-
-#=
-    If you're going to include files, please do so up here. Note that they
-    must be saved in project1_jl and you must use the relative path
-    (not the absolute path) of the file in the include statement.
-
-    [Good]  include("somefile.jl")
-    [Bad]   include("/pathto/project1_jl/somefile.jl")
-=#
-
-# Example
-# include("myfile.jl")
-
+include("gradient_descent_with_nesterov_momentum.jl")
+include("adam.jl")
+include("hypergradient_descent_with_nesterov_momentum.jl")
 
 """
     optimize(f, g, x0, n, prob)
@@ -42,13 +22,36 @@ Returns:
 """
 function optimize(f, g, x0, n, prob)
 
-    # evaluate f(x+ih) to determine grad for free
-    
+    if prob == "simple1" || prob == "simple2" || prob == "simple3"
+        descent_method = Adam(2e-1, 0.7, 0.99, 1e-6, 0, 0, 0)
+    else
+        descent_method = Adam(3e-1, 0.7, 0.99, 1e-6, 0, 0, 0)
+    end
 
-    # if prob == a
-        #x_history = algo()
-    #else
-    #return last(x_history)
-    x_best = x0
-    return x_best
+    x = x0
+    history = optimize_w_history(descent_method, f, g, x0, n)
+
+    filter!(x -> all(.!isnan.(x)), history)
+    return history[end]
+
+end
+
+function optimize_w_history(descent_method, f, g, x0, n)
+
+    x = x0
+    init!(descent_method, f, g, x)
+
+    history = []
+    push!(history,x0)
+
+    k = 0
+
+    while count(f, g) < n && k < n
+        x = step!(descent_method, f, g, x)
+        push!(history, x)
+        k+=1
+    end
+
+    return history
+
 end
