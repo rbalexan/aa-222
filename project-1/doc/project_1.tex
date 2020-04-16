@@ -45,7 +45,7 @@ We performed unconstrained optimization on three optimization benchmark function
 
 \subsection{Benchmark Functions}
 
-The Rosenbrock function $f_R:\mathbb{R}^2 \rightarrow \mathbb{R}$, is a multimodal, non-convex, two-dimensional function with a steep valley. The floor of the valley is very flat and can cause problems with algorithms utilizing the gradient alone. The Himmelblau function $f_H:\mathbb{R}^2 \rightarrow \mathbb{R}$ is also a multimodal, non-convex, two-dimensional function, though it has several local minima -- each at $f(\textbf{x}^*)=0$. The Powell function $f_R:\mathbb{R}^4 \rightarrow \mathbb{R}$, is a unimodal, four-dimensional function. The benchmark functions are shown in Eqns. (\ref{eqn:rosenbrock})-(\ref{eqn:powell}).
+The Rosenbrock function $f_R:\mathbb{R}^2 \rightarrow \mathbb{R}$, is a multimodal, non-convex, two-dimensional function with a steep valley. The floor of the valley is very flat and can cause problems with algorithms utilizing the gradient alone. The Himmelblau function $f_H:\mathbb{R}^2 \rightarrow \mathbb{R}$ is also a multimodal, non-convex, two-dimensional function, though it has several local minima -- each at $f(\textbf{x}^*)=0$. The Powell function $f_P:\mathbb{R}^4 \rightarrow \mathbb{R}$, is a unimodal, four-dimensional function. The benchmark functions are shown in Eqns. (\ref{eqn:rosenbrock})-(\ref{eqn:powell}).
 \begin{align}
     f_R(\textbf{x}) &= 100(x_2-x_1^2)^2 + (1-x_1)^2
     \label{eqn:rosenbrock} \\
@@ -58,7 +58,7 @@ The Rosenbrock function $f_R:\mathbb{R}^2 \rightarrow \mathbb{R}$, is a multimod
 
 \subsection{Adaptive Moment Estimation (\textsc{Adam}) Algorithm}
 
-We implemented many algorithms, but ultimately settled on the \textsc{Adam} optimization algorithm for its robust performance across each of the benchmark functions. The \textsc{Adam} algorithm uses a cumulative average of both the first moment of the gradient and the second moment of the gradient. Eqns. (\ref{eqn:adam1}) and (\ref{eqn:adam2}) describe the (biased) estimation step where we construct moving estimates of the first and second moments of the gradient. Eqns. (\ref{eqn:adam3}) and (\ref{eqn:adam4}) describe the bias correction step where we correct the biased estimators. And finally, Eqn. (\ref{eqn:adam5}) describes the update step, where $\alpha$ is the learning rate that is adapted by our unbiased estimators. The parameter $\epsilon$ is set to a small value to prevent division by zero.
+We implemented many algorithms, but ultimately settled on the \textsc{Adam} optimization algorithm for its robust performance across each of the benchmark functions. The \textsc{Adam} algorithm uses a cumulative average of both the first moment of the gradient and the second moment of the gradient. Eqns. (\ref{eqn:adam1}) and (\ref{eqn:adam2}) describe the (biased) estimation step where we construct moving estimates of the first and second moments of the gradient. Eqns. (\ref{eqn:adam3}) and (\ref{eqn:adam4}) describe the bias correction step where we correct the biased estimators. And finally, Eqn. (\ref{eqn:adam5}) describes the update step for iterate $\textbf{x}^{(k)}$ to $\textbf{x}^{(k+1)}$, where $\alpha$ is the learning rate that is adapted by our unbiased estimators and where $\epsilon$ is set to a small value to prevent division by zero.
 \begin{align}
     \textbf{v}^{(k+1)} &= \gamma_v \textbf{v}^{(k)} + (1 - \gamma_v) \textbf{g}^{(k)} \label{eqn:adam1} \\
     \textbf{s}^{(k+1)} &= \gamma_s \textbf{s}^{(k)} + (1 - \gamma_s) (\textbf{g}^{(k)} \odot \textbf{g}^{(k)}) \label{eqn:adam2} \\
@@ -107,13 +107,13 @@ We implemented many algorithms, but ultimately settled on the \textsc{Adam} opti
 \end{figure*}
 
 \subsection{Results \& Discussion}
-Figures \ref{fig:rosenbrock_opt} and \ref{fig:himmelblau_opt} show three randomly-initialized optimization on the Rosenbrock and Himmelblau functions, respectively. We can see that each of the optimizations traverses the local gradient and utilizes the momentum ($\textbf{v}$) to improve performance in regions with a shallow gradient. The three optimizations on the Himmelblau function highlight the responsiveness to local conditions as three random initializations converge to their close local minima.
+Figures \ref{fig:rosenbrock_opt} and \ref{fig:himmelblau_opt} show three randomly-initialized optimizations on the Rosenbrock and Himmelblau functions, respectively. We can see that each of the optimizations traverses the local gradient and utilizes the momentum ($\textbf{v}$) to improve performance in regions with a shallow gradient. The three optimizations on the Himmelblau function highlight the responsiveness to local conditions as three random initializations converge to local minima in their neighborhood.
 
 We show several absolute error convergence plots for the Rosenbrock, Himmelblau, and Powell functions in Fig. \ref{fig:conv}. The upper row of figures shows the convergence for a single randomly-initialized optimization, while the lower row of figures shows the convergence for five randomly-initialized optimizations. 
 
 Optimizations on the Rosenbrock function are generally slow to converge, as shown in the very shallow rate of convergence, likely due to the flatness of the valley in which the global minimum lies. The Rosenbrock optimizations are also less consistent than any other function optimizations, showing various convergence rates along with some oscillatory behavior for one of the optimizations. 
 
-Optimizations on the Himmelblau function show the robustness of the \textsc{Adam} optimization method with impressive convergence rates and consistency across iterations. We attribute this to the relatively simple and unimodal regions containing the local minima, which make convergence easy.
+Optimizations on the Himmelblau function show the robustness of the \textsc{Adam} optimization method with impressive convergence rates and consistency across iterations. We attribute this to the relatively simple and unimodal regions containing the local minima, which make convergence easily attainable.
 
 The four-dimensional Powell function displays similar convergence rates as the two-dimensional Rosenbrock function, despite the increased dimensionality of the search space. While the optimizations seem to have different "burn-in" periods, the optimizations have consistent convergence rates (aside from an unusual peak in one of the optimizations).
 
