@@ -330,20 +330,20 @@ end
 function get_opt_intervals(intervals, ϵ, y_best)
 
     max_depth = maximum(keys(intervals))
-    stack = [DataStructures.peek(intervals[max_depth])[1]]
+    stack = [DataStructures.peek(intervals[max_depth])[1]]  # get first smallest interval
     d = max_depth-1
 
     while d ≥ 0
 
         if haskey(intervals, d) && !isempty(intervals[d])
 
-            I = DataStructures.peek(intervals[d])[1]
-            x, y = 0.5*3.0^(-min_depth(I)), I.y
+            I = DataStructures.peek(intervals[d])[1] # retrieve the slightly larger interval
+            x, y = norm(0.5*3.0.^(-I.depths)), I.y  # get interval half-side-lengths (norm is dist from center to hyperrectangle diagonal)
 
             while !isempty(stack)
 
             	I1 = stack[end]
-            	x1, y1 = 0.5*3.0^(-min_depth(I1)), I1.y
+            	x1, y1 = norm(0.5*3.0.^(-I1.depths)), I1.y
             	L1 = (y - y1)/(x - x1)
 
             	if y1 - L1*x1 > y_best - ϵ || y < y1
@@ -351,7 +351,7 @@ function get_opt_intervals(intervals, ϵ, y_best)
             	elseif length(stack) > 1
 
             		I2 = stack[end-1]
-            		x2, y2 = 0.5*3.0^(-min_depth(I2)), I2.y
+            		x2, y2 = norm(0.5*3.0.^(-I2.depths)), I2.y
             		L2 = (y1 - y2)/(x1 - x2)
 
             		if L2 > L1
@@ -411,11 +411,12 @@ function direct_method(f, a, b, ϵ, K)
     g = reparameterize_to_unit_hypercube(f, a, b)
     intervals = Intervals()
     n = length(a)
-    c = fill(0.5, n)
-    I = Interval(c, g(c), fill(0, n))
+    c = fill(0.5, n) # get center of initial interval
+    I = Interval(c, g(c), fill(0, n)) # set center, y-values, depths
     add_interval!(intervals, I)
     c_best, y_best = copy(I.c), I.y
 
+    # iterate until max interations reached
     for k in 1 : K
 
         S = get_opt_intervals(intervals, ϵ, y_best)
@@ -440,11 +441,11 @@ function direct_method(f, a, b, ϵ, K)
 
     end
 
-    return rev_unit_hypercube_parameterization(c_best, a, b)
+    return rev_unit_hypercube_parameterization(c_best, a, b), intervals
 
 end
 
 ## DIRECT method example
 
 f(x)  = (x[1]+2x[2]-7)^2 + (2x[1]+x[2]-5)^2
-x = direct_method(f, [10, 10], [-10, -10], 1e-2, 25)
+x, intervals = direct_method(f, [10, 10], [-10, -10], 1e-1, 3)
