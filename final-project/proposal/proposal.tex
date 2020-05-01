@@ -25,7 +25,7 @@
 \begin{document}
 
 
-\title{\LARGE \textbf{Active Learning for Optimal Sequential Design of Experiments} \\ \large Final Project Proposal
+\title{\LARGE \textbf{Active Learning of Deep Global Metamodels} 
 %\thanks{Ross Alexander is supported by a Stanford Graduate Fellowship (SGF) in Science and Engineering.}
 }
 
@@ -39,56 +39,18 @@
 
 \maketitle
 
-\begin{abstract}
-    %
-\end{abstract}
-
-% \begin{IEEEkeywords}
-% component, formatting, style, styling, insert
-% \end{IEEEkeywords}
-
-\section{Introduction}
+\section{Project Proposal}
 \label{sec:introduction}
 
-% Overview of topic sentences
+We propose to explore neural networks (NNs), Gaussian processes (GPs), and their deep variants (DNNs and DGPs) in global metamodeling tasks with active learning. Global metamodeling is the discipline concerned with constructing a surrogate model over the input space that is optimal with respect to the number of training examples. Traditionally, global metamodels are constructed following detailed sampling schemes. Using these sampling schemes, each of the training examples is evaluated (or labeled) and the global metamodel is constructed using all of the labeled examples. Since these global metamodels generally increase in accuracy with the number of training examples, it is relevant to identify samples that will lead to optimal metamodel accuracy increases utilizing active learning rather than traditional static sampling plans. Active learning in global metamodeling (also called adaptive sampling) can be done in a variety of ways, including mini-batch and sequential sampling.
 
-% What is the problem?                     
+We want to investigate neural networks and Gaussian processes and their deep variants due to the well-demonstrated expressive power of these models. There are some key differences between NNs and GPs that make them worth considering. DNNs and DGPs have grown in popularity due to their principled composability and their ability to learn strongly nonlinear mappings from inputs to latent variables to outputs. This expressivity is manifested in different ways in each model; in DNNs, the choices of activation functions, learning rates, and DNN architectures govern the learned representation, while in DGPs, the choice of mean function, covariance function (kernel), noise variance, and DGP architectures govern the learned representation \cite{Damianou2013DeepProcesses}. While NNs and GPs both have methods for generating the expectation of the input space, GPs also provide methods for generating the variance of the input space. This offers much more flexibility for adaptive sampling objectives. On the other hand, the cost of training a GP using $n$ samples is $\mathcal{O}(n^3)$, which leads to computational intractability when the dataset is large.
 
-% Why is it interesting and important?
-% Why is it hard? Why do naive approaches fail?
+There are several relevant adaptive sampling techniques that have emerged from the surrogate optimization discipline \cite{Liu2018ADesign}. Some interesting approaches for GPs are error-based, variance-based, and hybrid error-and-variance-based active learning \cite{Liu2017AnError}. For both NNs and GPs, other adaptive sampling techniques include incremental Latin hypercube sampling (iLHS), and some techniques based on Voronoi cell decomposition: local linear approximation (LOLA-Voronoi), cross-validation (CV-Voronoi), and $k$-fold cross-validation (KFCV-Voronoi) \cite{Eason2014AdaptiveNetworks,Crombecq2009AModeling,Kaminsky2018AdaptiveSurfaces}. We also note mixture-of-experts methods with blending factors as an alternative to reduce GP training time in both low- and high-dimensional design spaces.
 
-% Why hasn't it been solved before? (Or, what's wrong with previous proposed solutions? How does mine differ?)
+We will evaluate some of these models and adaptive sampling techniques on several general optimization benchmark functions of varying dimensionality and modality. Some useful accuracy metrics are root-mean-squared error (RMSE), integrated squared error (ISE), integrated squared variance (ISV), and integrated variance (IV). We can also report model generation time as a measure of time complexity. There are several machine learning packages for Julia (e.g. \texttt{Flux.jl}, \texttt{Scikit-Learn.jl}) and for Python (e.g. \texttt{Tensorflow}, \texttt{PyTorch}, \texttt{Scikit-Learn}). Additionally, there are several popular GP packages for Julia (e.g. \texttt{GaussianProcesses.jl}, \texttt{Stheno.jl}) and for Python (e.g. \texttt{GPy}, \texttt{GPFlow}, \texttt{GPyTorch}, \texttt{PyDeepGP}). We will likely have to build our own implementation of some adaptive sampling algorithms since these are not as widely proliferated.
 
-% What are the key components of my approach and results? Also include any specific limitations.
-
-% Summary of the major contributions in bullet form, mentioning in which sections they can be found. This material doubles as an outline of the rest of the paper, saving space and eliminating redundancy.
-
-
-\section{Related Work}
-\label{sec:related-work}
-
-\cite{Zuluaga2013ActiveOptimization}
-
-
-\section{Background}
-\label{sec:background}
-
-
-\section{Proposed Approach}
-\label{sec:proposed-approach}
-
-
-\section{Experiments \& Results}
-\label{sec:experiments-results}
-
-
-\section{Conclusion}
-\label{sec:conclusion}
-
-
-\section{Future Work}
-\label{sec:future-work}
-
+Ultimately, improvements in global metamodeling using active learning on deep representations could lead to increased sample efficiency -- saving time and money across many experimental domains including engineering, biology, computer science.
 
 
 \bibliographystyle{IEEEtran}
