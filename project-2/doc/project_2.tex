@@ -1,0 +1,125 @@
+\documentclass[conference]{IEEEtran}
+
+\IEEEoverridecommandlockouts
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{svg}
+
+\usepackage{booktabs} %@{}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.16}
+\usepackage[per-mode=symbol,detect-all]{siunitx}
+\usepackage{hyperref}
+\usepackage{cleveref} %\Cref{} vs. \cref{}
+\usepackage[protrusion=true,expansion=true]{microtype}
+\usepackage{mathabx} % for \bigtimes
+
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+
+
+\title{\LARGE \textbf{Unconstrained Global Optimization Using the Adaptive \\ Moment Estimation (\textsc{Adam}) Algorithm} 
+}
+
+
+\author{\IEEEauthorblockN{  Ross B. Alexander}
+\IEEEauthorblockA{\textit{  Department of Aeronautics and Astronautics} \\
+\textit{                    Stanford University} \\
+                            Stanford, CA 94305 \\
+                            rbalexan@stanford.edu}} % or ORCID
+
+
+\maketitle
+
+\section{Unconstrained Optimization}
+
+We performed unconstrained optimization on three optimization benchmark functions -- the Rosenbrock function ($f_R$), the Himmelblau function ($f_H$), and the Powell function ($f_P$) \cite{Rosenbrock1960AnFunction,Himmelblau1972AppliedProgramming,Powell1962AnVariables} -- using the adaptive moment estimation (\textsc{Adam}) optimization algorithm \cite{Kingma2015Adam:Optimization}.
+
+\subsection{Benchmark Functions}
+
+The Rosenbrock function $f_R:\mathbb{R}^2 \rightarrow \mathbb{R}$, is a multimodal, non-convex, two-dimensional function with a steep valley. The floor of the valley is very flat and can cause problems with algorithms utilizing the gradient alone. The Himmelblau function $f_H:\mathbb{R}^2 \rightarrow \mathbb{R}$ is also a multimodal, non-convex, two-dimensional function, though it has several local minima -- each at $f(\textbf{x}^*)=0$. The Powell function $f_P:\mathbb{R}^4 \rightarrow \mathbb{R}$, is a unimodal, four-dimensional function. The benchmark functions are shown in Eqns. (\ref{eqn:rosenbrock})-(\ref{eqn:powell}).
+\begin{align}
+    f_R(\textbf{x}) &= 100(x_2-x_1^2)^2 + (1-x_1)^2
+    \label{eqn:rosenbrock} \\
+    f_H(\textbf{x}) &= (x_1^{2}+x_2-11)^{2}+(x_1+x_2^{2}-7)^{2}
+    \label{eqn:himmelblau} \\
+    f_P(\textbf{x}) &= (x_1 + 10x_2)^2 + 5(x_3-x_4)^2 + \nonumber \\ 
+                    & ~~~~(x_2-2x_3)^4 + 10(x_1-x_4)^4
+    \label{eqn:powell} 
+\end{align}
+
+\subsection{Adaptive Moment Estimation (\textsc{Adam}) Algorithm}
+
+We implemented many algorithms, but ultimately settled on the \textsc{Adam} optimization algorithm for its robust performance across each of the benchmark functions. The \textsc{Adam} algorithm uses a cumulative average of both the first moment of the gradient and the second moment of the gradient. Eqns. (\ref{eqn:adam1}) and (\ref{eqn:adam2}) describe the (biased) estimation step where we construct moving estimates of the first and second moments of the gradient. Eqns. (\ref{eqn:adam3}) and (\ref{eqn:adam4}) describe the bias correction step where we correct the biased estimators. And finally, Eqn. (\ref{eqn:adam5}) describes the update step for iterate $\textbf{x}^{(k)}$ to $\textbf{x}^{(k+1)}$, where $\alpha$ is the learning rate that is adapted by our unbiased estimators and where $\epsilon$ is set to a small value to prevent division by zero.
+\begin{align}
+    \textbf{v}^{(k+1)} &= \gamma_v \textbf{v}^{(k)} + (1 - \gamma_v) \textbf{g}^{(k)} \label{eqn:adam1} \\
+    \textbf{s}^{(k+1)} &= \gamma_s \textbf{s}^{(k)} + (1 - \gamma_s) (\textbf{g}^{(k)} \odot \textbf{g}^{(k)}) \label{eqn:adam2} \\
+    \hat{\textbf{v}}^{(k+1)} &= \textbf{v}^{(k+1)}/(1 - \gamma_v^{k+1}) \label{eqn:adam3} \\
+    \hat{\textbf{s}}^{(k+1)} &= \textbf{s}^{(k+1)}/(1 - \gamma_s^{k+1}) \label{eqn:adam4} \\
+    \textbf{x}^{(k+1)} &= \textbf{x}^{(k)} - \alpha \hat{\textbf{v}}^{(k+1)}/ \left(\sqrt{\hat{\textbf{s}}^{(k+1)}} + \epsilon\right) \label{eqn:adam5} 
+\end{align}
+
+\begin{figure}[h]
+    \centering
+    \includesvg[width=\linewidth]{../plots/rosenbrock_opt.svg}
+    \caption{Three optimization paths on the Rosenbrock function. The \textsc{Adam} optimizer was used with a learning rate of $\alpha = 0.2$, a first moment estimate decay factor $\gamma_v = 0.7$, and a second moment estimate decay factor $\gamma_s = 0.99$. The color gradations are the base-10 logarithm of the function values.}
+    \label{fig:rosenbrock_opt}
+\end{figure}
+\begin{figure}[h]
+    \centering
+    \includesvg[width=\linewidth]{../plots/himmelblau_opt.svg}
+    \caption{Three optimization paths on the Himmelblau function. The \textsc{Adam} optimizer was used with a learning rate of $\alpha = 0.2$, a first moment estimate decay factor $\gamma_v = 0.7$, and a second moment estimate decay factor $\gamma_s = 0.99$. The color gradations are the base-10 logarithm of the function values.}
+    \label{fig:himmelblau_opt}
+\end{figure}
+
+\begin{figure*}
+    
+    \hspace*{0.73in} \textbf{Rosenbrock function} \hspace*{1.03in} \textbf{Himmelblau function} \hspace*{1.16 in} \textbf{Powell function} \vspace*{0.05 in}
+    
+    \hfill
+    \includesvg[width=0.3\linewidth]{../plots/rosenbrock_conv_1.svg} 
+    \hfill
+    \includesvg[width=0.3\linewidth]{../plots/himmelblau_conv_1.svg} 
+    \hfill
+    \includesvg[width=0.3\linewidth]{../plots/powell_conv_1.svg}
+    \hfill
+    
+    \vspace{0.05in}
+    
+    \hfill
+    \includesvg[width=0.3\linewidth]{../plots/rosenbrock_conv_3_mult.svg} 
+    \hfill
+    \includesvg[width=0.3\linewidth]{../plots/himmelblau_conv_3_mult.svg} 
+    \hfill
+    \includesvg[width=0.3\linewidth]{../plots/powell_conv_3_mult.svg}
+    \hfill
+    
+    \caption{Convergence of the absolute error in optimizing the Rosenbrock function (\textit{left}), the Himmelblau function (\textit{center}), and the Powell function (\textit{right}). The upper figures depict a single randomly-initialized optimization and the lower figures depict a series of five randomly-initialized optimizations, demonstrating consistency in the convergence to a global minimum.}
+    \label{fig:conv}
+\end{figure*}
+
+\subsection{Results \& Discussion}
+Figures \ref{fig:rosenbrock_opt} and \ref{fig:himmelblau_opt} show three randomly-initialized optimizations on the Rosenbrock and Himmelblau functions, respectively. We can see that each of the optimizations traverses the local gradient and utilizes the momentum ($\textbf{v}$) to improve performance in regions with a shallow gradient. The three optimizations on the Himmelblau function highlight the responsiveness to local conditions as three random initializations converge to local minima in their neighborhood.
+
+We show several absolute error convergence plots for the Rosenbrock, Himmelblau, and Powell functions in Fig. \ref{fig:conv}. The upper row of figures shows the convergence for a single randomly-initialized optimization, while the lower row of figures shows the convergence for five randomly-initialized optimizations. 
+
+Optimizations on the Rosenbrock function are generally slow to converge, as shown in the very shallow rate of convergence, likely due to the flatness of the valley in which the global minimum lies. The Rosenbrock optimizations are also less consistent than any other function optimizations, showing various convergence rates along with some oscillatory behavior for one of the optimizations. 
+
+Optimizations on the Himmelblau function show the robustness of the \textsc{Adam} optimization method with impressive convergence rates and consistency across iterations. We attribute this to the relatively simple and unimodal regions containing the local minima, which make convergence easily attainable.
+
+The four-dimensional Powell function displays similar convergence rates as the two-dimensional Rosenbrock function, despite the increased dimensionality of the search space. While the optimizations seem to have different "burn-in" periods, the optimizations have consistent convergence rates (aside from an unusual peak in one of the optimizations).
+
+Overall, the adaptive moment estimation (\textsc{Adam}) optimization method was a robust and efficient choice for optimization on these benchmark functions along with two secret benchmark functions in the autograder. It would be interesting to investigate the performance of some newer variants of \textsc{Adam} with Nesterov momentum (\textsc{NAdam}) \cite{Dozat2016IncorporatingAdam} and with improved convergence guarantees (\textsc{AMSGrad}) \cite{Reddi2018OnBeyond}.
+
+\bibliographystyle{IEEEtran}
+\bibliography{project_1}
+
+\end{document}
