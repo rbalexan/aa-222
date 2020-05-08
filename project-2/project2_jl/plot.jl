@@ -52,14 +52,63 @@ end
 # simple 1
 optimization_plot(simple1_plot, simple1_constr1, simple1_constr2, xplot, yplot, simple1,
                 simple1_gradient, simple1_constraints, simple1_init, 5000, "simple1")
-savefig("plots/simple1_alg1_new.svg")
+#savefig("plots/simple1_alg1_new.svg")
 
 # simple 2
 optimization_plot(simple2_plot, simple2_constr1, simple2_constr2, xplot, yplot, simple2,
                 simple2_gradient, simple2_constraints, simple2_init, 10000, "simple2")
-savefig("plots/simple2_alg1_new.svg")
+#savefig("plots/simple2_alg1_new.svg")
 
 
+function constraint_plot(f, g, c, x0, n, prob)
+
+    histories = Dict()
+    f_vals = Dict()
+    c_vals = Dict()
+
+    for i in 1:3
+
+        for key in keys(COUNTERS)
+            COUNTERS[key] = 0
+        end
+
+        history = [:]
+        history = optimize(f, g, c, x0(), n, prob)
+
+        histories[i] = history
+        f_vals[i] = f.(history)
+        c_vals[i] = [ max(maximum(c(history[i])), 0) for i in 1:size(history)[1]]
+
+    end
+
+
+    plot(1:size(histories[1])[1], f_vals[1], box=true, size=(400,400), grid=true,
+            w=2, label="Sample Optimization 1", yscale=:log10)
+    plot!(1:size(histories[2])[1], f_vals[2],
+            w=2, label="Sample Optimization 2")
+    plot!(1:size(histories[3])[1], f_vals[3],
+            w=2, label="Sample Optimization 3")
+    xlabel!("Iteration")
+    ylabel!("Log(Objective Function)")
+    savefig("plots/simple2_fconv_alg2.svg")
+
+    plot(1:size(histories[1])[1], c_vals[1], box=true, size=(400,400), grid=true,
+            w=2, label="Sample Optimization 1")
+    plot!(1:size(histories[2])[1], c_vals[2],
+            w=2, label="Sample Optimization 2")
+    plot!(1:size(histories[3])[1], c_vals[3],
+            w=2, label="Sample Optimization 3")
+    xlabel!("Iteration")
+    ylabel!("Constraint Violation (clipped at 0)")
+    savefig("plots/simple2_cconv_alg2.svg")
+
+end
+
+# simple2
+constraint_plot(simple2, simple2_gradient, simple2_constraints, simple2_init,
+                3000, "simple2")
+
+a = 2
 # need to make modified optimize function to run a second case
 # then need to do constraint violation plot
 

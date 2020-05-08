@@ -31,7 +31,7 @@ function optimize(f, g, c, x0, n, prob)
                                         exterior_unconstrained_method, true)
     interior_method               = InteriorPointMethod(1.0, 2.0, inverse_barrier)
 
-    # algorithm 2
+    # algorithm 2 (for comparisons)
     # exterior_unconstrained_method = NesterovMomentum(1e-3, 0.9, [])
     # exterior_method               = PenaltyMethod(1e0, 1e0, 2.0,
     #                                     mixed_penalty,
