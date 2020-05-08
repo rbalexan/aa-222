@@ -26,7 +26,7 @@
 \begin{document}
 
 
-\title{\LARGE \textbf{Unconstrained Global Optimization Using the Adaptive \\ Moment Estimation (\textsc{Adam}) Algorithm} 
+\title{\LARGE \textbf{Constrained Global Optimization Using \\ Exterior and Interior Methods} 
 }
 
 
@@ -39,87 +39,64 @@
 
 \maketitle
 
-\section{Unconstrained Optimization}
+\section{Constrained Optimization}
 
-We performed unconstrained optimization on three optimization benchmark functions -- the Rosenbrock function ($f_R$), the Himmelblau function ($f_H$), and the Powell function ($f_P$) \cite{Rosenbrock1960AnFunction,Himmelblau1972AppliedProgramming,Powell1962AnVariables} -- using the adaptive moment estimation (\textsc{Adam}) optimization algorithm \cite{Kingma2015Adam:Optimization}.
+For each of the problems, we use an exterior method coupled with an interior method. 
+Decomposing the problem into an exterior method, which searches the design space for a solution in the feasible space, and an interior method, which searches the feasible space, makes use of the strengths of each method while guaranteeing a feasible solution so long as the exterior method converges. 
 
-\subsection{Benchmark Functions}
+From our initial design point, we iterate using the exterior method and terminate once a feasible solution is found. The solution from the exterior method is then used as the initial design point for the interior method, which runs until the number of function, gradient, and constraint evaluations reaches the maximum number of allowed evaluations.
 
-The Rosenbrock function $f_R:\mathbb{R}^2 \rightarrow \mathbb{R}$, is a multimodal, non-convex, two-dimensional function with a steep valley. The floor of the valley is very flat and can cause problems with algorithms utilizing the gradient alone. The Himmelblau function $f_H:\mathbb{R}^2 \rightarrow \mathbb{R}$ is also a multimodal, non-convex, two-dimensional function, though it has several local minima -- each at $f(\textbf{x}^*)=0$. The Powell function $f_P:\mathbb{R}^4 \rightarrow \mathbb{R}$, is a unimodal, four-dimensional function. The benchmark functions are shown in Eqns. (\ref{eqn:rosenbrock})-(\ref{eqn:powell}).
-\begin{align}
-    f_R(\textbf{x}) &= 100(x_2-x_1^2)^2 + (1-x_1)^2
-    \label{eqn:rosenbrock} \\
-    f_H(\textbf{x}) &= (x_1^{2}+x_2-11)^{2}+(x_1+x_2^{2}-7)^{2}
-    \label{eqn:himmelblau} \\
-    f_P(\textbf{x}) &= (x_1 + 10x_2)^2 + 5(x_3-x_4)^2 + \nonumber \\ 
-                    & ~~~~(x_2-2x_3)^4 + 10(x_1-x_4)^4
-    \label{eqn:powell} 
-\end{align}
+\subsection{Exterior Method}
 
-\subsection{Adaptive Moment Estimation (\textsc{Adam}) Algorithm}
+For the exterior method, we use the quadratic penalty method with a forward finite-difference penalty gradient approximation on top of gradient descent with Nesterov momentum.
 
-We implemented many algorithms, but ultimately settled on the \textsc{Adam} optimization algorithm for its robust performance across each of the benchmark functions. The \textsc{Adam} algorithm uses a cumulative average of both the first moment of the gradient and the second moment of the gradient. Eqns. (\ref{eqn:adam1}) and (\ref{eqn:adam2}) describe the (biased) estimation step where we construct moving estimates of the first and second moments of the gradient. Eqns. (\ref{eqn:adam3}) and (\ref{eqn:adam4}) describe the bias correction step where we correct the biased estimators. And finally, Eqn. (\ref{eqn:adam5}) describes the update step for iterate $\textbf{x}^{(k)}$ to $\textbf{x}^{(k+1)}$, where $\alpha$ is the learning rate that is adapted by our unbiased estimators and where $\epsilon$ is set to a small value to prevent division by zero.
-\begin{align}
-    \textbf{v}^{(k+1)} &= \gamma_v \textbf{v}^{(k)} + (1 - \gamma_v) \textbf{g}^{(k)} \label{eqn:adam1} \\
-    \textbf{s}^{(k+1)} &= \gamma_s \textbf{s}^{(k)} + (1 - \gamma_s) (\textbf{g}^{(k)} \odot \textbf{g}^{(k)}) \label{eqn:adam2} \\
-    \hat{\textbf{v}}^{(k+1)} &= \textbf{v}^{(k+1)}/(1 - \gamma_v^{k+1}) \label{eqn:adam3} \\
-    \hat{\textbf{s}}^{(k+1)} &= \textbf{s}^{(k+1)}/(1 - \gamma_s^{k+1}) \label{eqn:adam4} \\
-    \textbf{x}^{(k+1)} &= \textbf{x}^{(k)} - \alpha \hat{\textbf{v}}^{(k+1)}/ \left(\sqrt{\hat{\textbf{s}}^{(k+1)}} + \epsilon\right) \label{eqn:adam5} 
-\end{align}
+While zero-order methods can be useful in situations where the gradient of the objective function is not available, first-order methods can improve the search performance in situations where this information is available (as is the case for us). Additionally, in constrained optimization, gradient information can be useful in guiding the search toward feasibility. As a result, we use a penalty method with a quadratic penalty, which introduces a component of objective function proportional to the square of the distance from the nearest constraint boundary, and accordingly, a component of the gradient proportional to twice the distance to the nearest constraint boundary. This additional component of the gradient is an improvement over a count penalty, which only introduces a discontinuity at constraint boundaries and does not help guide the search toward feasibility but rather "corral" the solution to remain in the feasible space. As such, a mixed penalty consisting of a linear combination of a count penalty and a quadratic penalty does not confer much of an advantage over a quadratic penalty alone.\footnote{While the count, quadratic, and mixed penalties are all implemented, we settled on the quadratic penalty.}
 
-\begin{figure}[h]
-    \centering
-    \includesvg[width=\linewidth]{../plots/rosenbrock_opt.svg}
-    \caption{Three optimization paths on the Rosenbrock function. The \textsc{Adam} optimizer was used with a learning rate of $\alpha = 0.2$, a first moment estimate decay factor $\gamma_v = 0.7$, and a second moment estimate decay factor $\gamma_s = 0.99$. The color gradations are the base-10 logarithm of the function values.}
-    \label{fig:rosenbrock_opt}
-\end{figure}
-\begin{figure}[h]
-    \centering
-    \includesvg[width=\linewidth]{../plots/himmelblau_opt.svg}
-    \caption{Three optimization paths on the Himmelblau function. The \textsc{Adam} optimizer was used with a learning rate of $\alpha = 0.2$, a first moment estimate decay factor $\gamma_v = 0.7$, and a second moment estimate decay factor $\gamma_s = 0.99$. The color gradations are the base-10 logarithm of the function values.}
-    \label{fig:himmelblau_opt}
-\end{figure}
+As mentioned earlier, we use gradient descent with Nesterov momentum to descend the penalized objective function. Gradient descent with Nesterov momentum exploits the benefits of traditional momentum but employs a look-ahead gradient to reduce momentum near minima, which makes for more efficient gradient descent. Since we are using a first-order method on the penalized objective function to descend into the feasible space, we need to explicitly compute the gradient of the penalty function. For this, we choose a forward finite-difference approximation. While the linear convergence ($\mathcal{O}(h)$) of the forward-difference approximation is clearly inferior to the quadratic convergence ($\mathcal{O}(h^2)$) of the central-difference approximation, we use the forward-difference approximation since after evaluating the penalty at the current design point, we only need to compute its variation at the forward step along each dimension ($n$ function evaluations) versus needing to compute the variations at both the forward and backward step along each dimension ($2n$ function evaluations). While this is a trade-off, we choose the first-order method since the gradient of the penalty function does not need to be known with high precision.
 
-\begin{figure*}
-    
-    \hspace*{0.73in} \textbf{Rosenbrock function} \hspace*{1.03in} \textbf{Himmelblau function} \hspace*{1.16 in} \textbf{Powell function} \vspace*{0.05 in}
-    
-    \hfill
-    \includesvg[width=0.3\linewidth]{../plots/rosenbrock_conv_1.svg} 
-    \hfill
-    \includesvg[width=0.3\linewidth]{../plots/himmelblau_conv_1.svg} 
-    \hfill
-    \includesvg[width=0.3\linewidth]{../plots/powell_conv_1.svg}
-    \hfill
-    
-    \vspace{0.05in}
-    
-    \hfill
-    \includesvg[width=0.3\linewidth]{../plots/rosenbrock_conv_3_mult.svg} 
-    \hfill
-    \includesvg[width=0.3\linewidth]{../plots/himmelblau_conv_3_mult.svg} 
-    \hfill
-    \includesvg[width=0.3\linewidth]{../plots/powell_conv_3_mult.svg}
-    \hfill
-    
-    \caption{Convergence of the absolute error in optimizing the Rosenbrock function (\textit{left}), the Himmelblau function (\textit{center}), and the Powell function (\textit{right}). The upper figures depict a single randomly-initialized optimization and the lower figures depict a series of five randomly-initialized optimizations, demonstrating consistency in the convergence to a global minimum.}
-    \label{fig:conv}
-\end{figure*}
+\subsection{Interior Method}
+
+For the interior method, we use the inverse-barrier interior point method on top of the Hooke-Jeeves method.
+
+The interior point method utilizes a similar approach to the penalty method by penalizing near-constraint violation using a barrier penalty function. This barrier function adds a penalty that approaches infinity as the design point approaches the constraint. At each iteration, the strength of the barrier function is decreased by a constant factor, which allows the solution to remain in the feasible space while slowly and safely approaching the constraint boundary using the inner descent method. The process of gradually reducing a penalty applied by the barrier function is similar to simulated annealing, which can help the optimization process avoid local minima. There are two popular choices for barrier functions: an inverse barrier function applies a penalty globally (over the entire feasible space) and a logarithmic barrier function applies a penalty locally (only very close to the constraint boundary), however, to utilize the benefits of simulated annealing, we choose the inverse barrier function over the log barrier function due to the globality of the applied penalty.\footnote{Similarly to the penalty method, while the inverse and log barrier functions are all implemented, we settled on the inverse barrier function.}
+
+We used the Hooke-Jeeves method to descend the penalized objective function in the feasible space. While we have gradient information, which enables us to use first-order methods, we use a first-order method, namely, the Hooke-Jeeves method, to descend the penalized objective function since it is relatively simple to implement. Unfortunately, the Hooke-Jeeves method is the most expensive among pattern-based zero-order methods, requiring $2n$ evaluations per iteration, compared with $n+1$ evaluations per iteration for methods like generalized pattern search (GPS), the Nelder-Mead simplex method, and mesh-adaptive direct search (MADS). This is something we will have to live with. The Hooke-Jeeves method searches along each positive and negative basis for an improvement and accepts the best one -- this behavior can lead the search to get stuck in local minima (as we see in the \texttt{simple2} example, or maybe there is a bug in our implementation).
+
+% For each of the five problems given, describe:
+
+% The algorithm you chose to solve it.
+% How you decided which hyperparameters to choose.
+% Why you think it works.
+% At least one pro and one con to the chosen algorithm.
+% Comparison of algorithms
 
 \subsection{Results \& Discussion}
-Figures \ref{fig:rosenbrock_opt} and \ref{fig:himmelblau_opt} show three randomly-initialized optimizations on the Rosenbrock and Himmelblau functions, respectively. We can see that each of the optimizations traverses the local gradient and utilizes the momentum ($\textbf{v}$) to improve performance in regions with a shallow gradient. The three optimizations on the Himmelblau function highlight the responsiveness to local conditions as three random initializations converge to local minima in their neighborhood.
 
-We show several absolute error convergence plots for the Rosenbrock, Himmelblau, and Powell functions in Fig. \ref{fig:conv}. The upper row of figures shows the convergence for a single randomly-initialized optimization, while the lower row of figures shows the convergence for five randomly-initialized optimizations. 
+%You must compare the performance of at least two algorithms by doing the following.
 
-Optimizations on the Rosenbrock function are generally slow to converge, as shown in the very shallow rate of convergence, likely due to the flatness of the valley in which the global minimum lies. The Rosenbrock optimizations are also less consistent than any other function optimizations, showing various convergence rates along with some oscillatory behavior for one of the optimizations. 
+%For simple1 and simple2, plot the feasible region (where  c(x)≤0 ) on top of a contour plot of  f(x) . Show the path taken by the algorithm for at least three initial conditions on this plot. Make a separate plot for at least two distinct algorithms (four plots). For both problems the axis limits should be (-3, 3).
+%For only simple2, and for at least two distinct algorithms, plot the objective function versus iteration, and maximum constraint violation versus iteration, for at least three initial conditions. Plot the curves for different initial conditions on the same plot, but make a separate plot for the objective and constraint violation, and for each of the two algorithms compared (four plots).
 
-Optimizations on the Himmelblau function show the robustness of the \textsc{Adam} optimization method with impressive convergence rates and consistency across iterations. We attribute this to the relatively simple and unimodal regions containing the local minima, which make convergence easily attainable.
+\begin{figure*}[h]
+    \centering
+    \includesvg[width=0.49\linewidth]{../plots/simple1_alg1.svg}
+    \includesvg[width=0.49\linewidth]{../plots/simple2_alg1.svg}
+    \caption{Three optimization paths on the \texttt{simple1} function (\textit{left}) and the \texttt{simple2} function (\textit{right}). For the exterior method, these optimizations use the quadratic penalty method ($\rho=1$, $\gamma=2$) with gradient descent with Nesterov momentum ($\alpha=1\textsc{E}-3$, $\beta=0.9$) and for the interior method, these optimizations use the inverse-barrier interior point method ($\rho=1$, $\gamma=2$) on top of the Hooke-Jeeves method ($\alpha_0=1\textsc{E}-1$, $\gamma=0.5$, $\epsilon=1\textsc{E}-4$, $k_{max}=10$). The color gradations for \texttt{simple2} are the base-10 logarithm of the function values.}
+    \label{fig:simple1_alg1}
+\end{figure*}
 
-The four-dimensional Powell function displays similar convergence rates as the two-dimensional Rosenbrock function, despite the increased dimensionality of the search space. While the optimizations seem to have different "burn-in" periods, the optimizations have consistent convergence rates (aside from an unusual peak in one of the optimizations).
 
-Overall, the adaptive moment estimation (\textsc{Adam}) optimization method was a robust and efficient choice for optimization on these benchmark functions along with two secret benchmark functions in the autograder. It would be interesting to investigate the performance of some newer variants of \textsc{Adam} with Nesterov momentum (\textsc{NAdam}) \cite{Dozat2016IncorporatingAdam} and with improved convergence guarantees (\textsc{AMSGrad}) \cite{Reddi2018OnBeyond}.
+% \begin{figure*}
+%     \hfill
+%     \includesvg[width=0.3\linewidth]{../plots/rosenbrock_conv_3_mult.svg} 
+%     \hfill
+%     \includesvg[width=0.3\linewidth]{../plots/himmelblau_conv_3_mult.svg} 
+%     \hfill
+%     \includesvg[width=0.3\linewidth]{../plots/powell_conv_3_mult.svg}
+%     \hfill
+%     \caption{}
+%     \label{fig:conv}
+% \end{figure*}
 
-\bibliographystyle{IEEEtran}
-\bibliography{project_1}
 
 \end{document}
