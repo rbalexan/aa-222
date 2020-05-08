@@ -7,8 +7,6 @@ include("nesterov_momentum.jl")
 include("penalty_method.jl")
 include("interior_point_method.jl")
 
-
-
 """
     optimize(f, g, c, x0, n, prob)
 
@@ -38,13 +36,15 @@ function optimize(f, g, c, x0, n, prob)
     push!(history, x0)
 
     init_feasible = prob == "secret1" ? true : false
-    n             = prob == "secret2" ? n-200 : n-(4*length(x0)+1)
+    # can do n = Inf for plotting
+    #n             = prob == "secret2" ? n-200 : n-(4*length(x0)+1)
 
     optimize!(history, exterior_method, interior_method, f, g, c, x0, n, feasible=init_feasible)
 
     filter!(x -> all(.!isnan.(x)), history)
 
-    return history[end]
+    return history
+    #return history[end]
 
 end
 
@@ -68,5 +68,7 @@ function optimize!(history, exterior_method, interior_method, f, g, c, x, n; fea
         push!(history, x)
 
     end
+
+    return history
 
 end
