@@ -1,6 +1,4 @@
 using LinearAlgebra
-using Statistics
-using Distributions
 
 abstract type ConstrainedOptimizationMethod end
 abstract type UnconstrainedOptimizationMethod end
@@ -27,63 +25,48 @@ Returns:
 """
 function optimize(f, g, c, x0, n, prob)
 
-    #if prob == "simple1" || prob == "simple2" || prob == "simple3"
-    #    descent_method = Adam(2e-1, 0.7, 0.99, 1e-6, 0, 0, 0)
-    #else
-    #    descent_method = Adam(3e-1, 0.7, 0.99, 1e-6, 0, 0, 0)
-    #end
-
-    #x = x0
-
     exterior_unconstrained_method = NesterovMomentum(1e-3, 0.9, [])
-    exterior_method               = PenaltyMethod(1e0, 1e0, 2.0, quadratic_penalty,
+    exterior_method               = PenaltyMethod(1e0, 1e0, 2.0,
+                                        quadratic_penalty,
                                         forward_difference_penalty_gradient,
                                         exterior_unconstrained_method, true)
-    #interior_unconstrained_method = hooke_jeeves_method
-    interior_method               = InteriorPointMethod(1.0, 2.0, 1e-3, Inf,
-                                        inverse_barrier)
+    interior_method               = InteriorPointMethod(1.0, 2.0, inverse_barrier)
+
+    # secret1 has guaranteed feasible start
 
     history = []
     push!(history, x0)
 
-    optimize!(history, exterior_method, interior_method, f, g, c, x0, n)
+    init_feasible = prob == "secret1" ? true : false
+    n             = prob == "secret2" ? n-200 : n-(4*length(x0)+1)
 
-    #filter!(x -> all(.!isnan.(x)), history)
-    #@show history
-    #@show count(f,g,c)
-    @show history[end]
+    optimize!(history, exterior_method, interior_method, f, g, c, x0, n, feasible=init_feasible)
+
+    filter!(x -> all(.!isnan.(x)), history)
+
     return history[end]
 
 end
 
 
-function optimize!(history, exterior_method, interior_method, f, g, c, x, n; k=0)
+function optimize!(history, exterior_method, interior_method, f, g, c, x, n; feasible=false)
 
     init!(exterior_method.unconstrained_opt_method, f, g, x)
-    feasible = false
 
-    # get a feasible point
-    while !feasible && count(f, g, c) < n && k < n
+    # obtain a feasible point
+    while !feasible && count(f, g, c) < n
 
         x, feasible = step!(exterior_method, f, g, c, x)
         push!(history, x)
 
-        k += 1
-
     end
-
-    #@show x
 
     # search the feasible space
-    while count(f, g, c) < n && k < n
+    while count(f, g, c) < n # min eval per hooke-jeeves loop plus a few since it doesnt seem to work
 
-        x = step!(interior_method, f, g, c, x)
+        x, feasible = step!(interior_method, f, g, c, x, n)
         push!(history, x)
 
-        k += 1
-
     end
-
-    return history
 
 end
