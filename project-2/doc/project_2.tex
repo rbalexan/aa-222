@@ -56,70 +56,54 @@ As mentioned earlier, we use gradient descent with Nesterov momentum to descend 
 
 \subsection{Interior Method}
 
-For the interior method, we use the inverse-barrier interior point method on top of the Hooke-Jeeves method.
-
-The interior point method utilizes a similar approach to the penalty method by penalizing near-constraint violation using a barrier penalty function. This barrier function adds a penalty that approaches infinity as the design point approaches the constraint. At each iteration, the strength of the barrier function is decreased by a constant factor, which allows the solution to remain in the feasible space while slowly and safely approaching the constraint boundary using the inner descent method. The process of gradually reducing a penalty applied by the barrier function is similar to simulated annealing, which can help the optimization process avoid local minima. There are two popular choices for barrier functions: an inverse barrier function applies a penalty globally (over the entire feasible space) and a logarithmic barrier function applies a penalty locally (only very close to the constraint boundary), however, to utilize the benefits of simulated annealing, we choose the inverse barrier function over the log barrier function due to the globality of the applied penalty.\footnote{Similarly to the penalty method, while the inverse and log barrier functions are all implemented, we settled on the inverse barrier function.}
-
-We used the Hooke-Jeeves method to descend the penalized objective function in the feasible space. While we have gradient information, which enables us to use first-order methods, we use a first-order method, namely, the Hooke-Jeeves method, to descend the penalized objective function since it is relatively simple to implement. Unfortunately, the Hooke-Jeeves method is the most expensive among pattern-based zero-order methods, requiring $2n$ evaluations per iteration, compared with $n+1$ evaluations per iteration for methods like generalized pattern search (GPS), the Nelder-Mead simplex method, and mesh-adaptive direct search (MADS). This is something we will have to live with. The Hooke-Jeeves method searches along each positive and negative basis for an improvement and accepts the best one -- this behavior can lead the search to get stuck in local minima (as we see in the \texttt{simple2} example, or maybe there is a bug in our implementation).
-
-% For each of the five problems given, describe:
-
-% The algorithm you chose to solve it.
-% How you decided which hyperparameters to choose.
-% Why you think it works.
-% At least one pro and one con to the chosen algorithm.
-% Comparison of algorithms
-
-\subsection{Results \& Discussion}
-
-\begin{figure*}[h]
+\begin{figure*}[htb]
     \centering
-    \includesvg[width=0.49\linewidth]{../plots/simple1_alg1.svg}
-    \includesvg[width=0.49\linewidth]{../plots/simple2_alg1.svg}
+    \includesvg[width=0.45\linewidth]{../plots/simple1_alg1.svg} \hspace*{2em}
+    \includesvg[width=0.45\linewidth]{../plots/simple2_alg1.svg}
     \caption{Three constrained optimization paths on the \texttt{simple1} function (\textit{left}) and the \texttt{simple2} function (\textit{right}). The feasible space for \texttt{simple1} is the semi-elliptic region in the center and the feasible space for \texttt{simple2} is the left-half region. For the exterior method, these optimizations use the quadratic penalty method ($\rho=1$, $\gamma=2$) with gradient descent with Nesterov momentum ($\alpha=1\textsc{E}-3$, $\beta=0.9$) and for the interior method, these optimizations use the inverse-barrier interior point method ($\rho=1$, $\gamma=2$) on top of the Hooke-Jeeves method ($\alpha_0=1\textsc{E}-1$, $\gamma=0.5$, $\epsilon=1\textsc{E}-4$, $k_{max}=10$). The color gradations for \texttt{simple2} are the base-10 logarithm of the function values.}
     \label{fig:alg1}
 \end{figure*}
 
-\begin{figure*}[h]
+\begin{figure*}[htb]
     \centering
-    \includesvg[width=0.49\linewidth]{../plots/simple1_alg2.svg}
-    \includesvg[width=0.49\linewidth]{../plots/simple2_alg2.svg}
+    \includesvg[width=0.45\linewidth]{../plots/simple1_alg2.svg} \hspace*{2em}
+    \includesvg[width=0.45\linewidth]{../plots/simple2_alg2.svg}
     \caption{Three constrained optimization paths on the \texttt{simple1} function (\textit{left}) and the \texttt{simple2} function (\textit{right}). The feasible space for \texttt{simple1} is the semi-elliptic region in the center and the feasible space for \texttt{simple2} is the left-half region. For the exterior method, these optimizations use the mixed penalty method ($\rho_1=1$, $\rho_2=1$, $\gamma=2$) with gradient descent with Nesterov momentum ($\alpha=1\textsc{E}-3$, $\beta=0.9$) and for the interior method, these optimizations use the log-barrier interior point method ($\rho=1$, $\gamma=2$) on top of the Hooke-Jeeves method ($\alpha_0=1\textsc{E}-1$, $\gamma=0.5$, $\epsilon=1\textsc{E}-4$, $k_{max}=10$). The color gradations for \texttt{simple2} are the base-10 logarithm of the function values.}
     \label{fig:alg2}
 \end{figure*}
 
-\begin{figure*}[h]
+\begin{figure*}[htb]
     \centering
-    \includesvg[width=0.49\linewidth]{../plots/simple2_fconv_alg1.svg}
-    \includesvg[width=0.49\linewidth]{../plots/simple2_cconv_alg1.svg}
-    \caption{Convergence of objective function (\textit{left}) and the maximal constraint violation (\textit(right)) for three randomly-initialized constrained optimizations on the \texttt{simple2} function. For the exterior method, these optimizations use the quadratic penalty method ($\rho=1$, $\gamma=2$) with gradient descent with Nesterov momentum ($\alpha=1\textsc{E}-3$, $\beta=0.9$) and for the interior method, these optimizations use the inverse-barrier interior point method ($\rho=1$, $\gamma=2$) on top of the Hooke-Jeeves method ($\alpha_0=1\textsc{E}-1$, $\gamma=0.5$, $\epsilon=1\textsc{E}-4$, $k_{max}=10$). The color gradations for \texttt{simple2} are the base-10 logarithm of the function values.}
+    \includesvg[width=0.35\linewidth]{../plots/simple2_fconv_alg1.svg} \hspace*{6em}
+    \includesvg[width=0.35\linewidth]{../plots/simple2_cconv_alg1.svg}
+    \caption{Convergence of objective function (\textit{left}) and the maximal constraint violation (\textit{right}) for three randomly-initialized constrained optimizations on the \texttt{simple2} function. We use the first algorithm (and hyperparameters) described in Fig. \ref{fig:alg1}.}
     \label{fig:alg1_conv}
 \end{figure*}
 
-\begin{figure*}[h]
+\begin{figure*}[htb]
     \centering
-    \includesvg[width=0.49\linewidth]{../plots/simple2_fconv_alg2.svg}
-    \includesvg[width=0.49\linewidth]{../plots/simple2_cconv_alg2.svg}
-    \caption{Convergence of objective function (\textit{left}) and the maximal constraint violation (\textit(right)) for three randomly-initialized constrained optimizations on the \texttt{simple2} function. For the exterior method, these optimizations use the mixed penalty method ($\rho_1=1$, $\rho_2=1$, $\gamma=2$) with gradient descent with Nesterov momentum ($\alpha=1\textsc{E}-3$, $\beta=0.9$) and for the interior method, these optimizations use the log-barrier interior point method ($\rho=1$, $\gamma=2$) on top of the Hooke-Jeeves method ($\alpha_0=1\textsc{E}-1$, $\gamma=0.5$, $\epsilon=1\textsc{E}-4$, $k_{max}=10$).}
+    \includesvg[width=0.35\linewidth]{../plots/simple2_fconv_alg2.svg} \hspace*{6em}
+    \includesvg[width=0.35\linewidth]{../plots/simple2_cconv_alg2.svg}
+    \caption{Convergence of objective function (\textit{left}) and the maximal constraint violation (\textit{right}) for three randomly-initialized constrained optimizations on the \texttt{simple2} function. We use the second algorithm (and hyperparameters) described in Fig. \ref{fig:alg2}.}
     \label{fig:alg2_conv}
 \end{figure*}
 
+For the interior method, we use the inverse-barrier interior point method on top of the Hooke-Jeeves method.
 
-%You must compare the performance of at least two algorithms by doing the following.
+The interior point method utilizes a similar approach to the penalty method by penalizing near-constraint violation using a barrier penalty function. This barrier function adds a penalty that approaches infinity as the design point approaches the constraint. At each iteration, the strength of the barrier function is decreased by a constant factor, which allows the solution to remain in the feasible space while slowly and safely approaching the constraint boundary using the inner descent method. The process of gradually reducing a penalty applied by the barrier function is similar to simulated annealing, which can help the optimization process avoid local minima. There are two popular choices for barrier functions: an inverse barrier function applies a penalty globally (over the entire feasible space) and a logarithmic barrier function applies a penalty locally (only very close to the constraint boundary), however, to utilize the benefits of simulated annealing, we choose the inverse barrier function over the log barrier function due to the globality of the applied penalty.\footnote{Similarly to the penalty method, while the inverse and log barrier functions are all implemented, we settled on the inverse barrier function.}
 
-%For only simple2, and for at least two distinct algorithms, plot the objective function versus iteration, and maximum constraint violation versus iteration, for at least three initial conditions. Plot the curves for different initial conditions on the same plot, but make a separate plot for the objective and constraint violation, and for each of the two algorithms compared (four plots).
+We used the Hooke-Jeeves method to descend the penalized objective function in the feasible space. While we have gradient information, which enables us to use first-order methods, we use a first-order method, namely, the Hooke-Jeeves method, to descend the penalized objective function since it is relatively simple to implement. Unfortunately, the Hooke-Jeeves method is the most expensive among pattern-based zero-order methods, requiring $2n$ evaluations per iteration, compared with $n+1$ evaluations per iteration for methods like generalized pattern search (GPS), the Nelder-Mead simplex method, and mesh-adaptive direct search (MADS). This is something we will have to live with. The Hooke-Jeeves method searches along each positive and negative basis for an improvement and accepts the best one -- this behavior can lead the search to get stuck in local minima (as we see in the \texttt{simple2} figures).
 
-% \begin{figure*}
-%     \hfill
-%     \includesvg[width=0.3\linewidth]{../plots/rosenbrock_conv_3_mult.svg} 
-%     \hfill
-%     \includesvg[width=0.3\linewidth]{../plots/himmelblau_conv_3_mult.svg} 
-%     \hfill
-%     \includesvg[width=0.3\linewidth]{../plots/powell_conv_3_mult.svg}
-%     \hfill
-%     \caption{}
-%     \label{fig:conv}
-% \end{figure*}
+\subsection{Results \& Discussion}
 
+In Figures \ref{fig:alg1}-\ref{fig:alg2_conv}, we see the application of two methods, varying in their choice of penalty function (quadratic versus mixed) and barrier function (inverse versus logarithmic). More details including hyperparameter values are included in the figure captions.
+
+Deciding on the hyperparameters for each method relied on some typical values provided in the textbook as well as some cyclic search over the hyperparameter space. Using the \texttt{localtest.jl}, we iterated over a few values of each parameter and swept the hyperparameter space twice. Several of the parameters were more difficult to tune, including the Nesterov momentum parameters, as these depend on the magnitude of objective function's gradient, which varies from problem to problem and also varies with the strength and choice of penalty function. The typical penalty and barrier hyperparameters worked well, so we did not alter them much. Tuning the Hooke-Jeeves method was much more complicated an involved trade-offs with number of iterations and accuracy since the method itself is run inside of the interior point method loop. Ultimately, we settled on a maximum of 10 inner iterations with an initial step size of 0.1. All of these hyperparameters seemed to work reasonably well for all functions.
+
+Looking at Figures \ref{fig:alg1} and \ref{fig:alg2}, we see no remarkable difference between the performance on each function using the two different algorithms. Each of the methods can be seen to first obtain a solution in the feasible space and then optimize the solution in the interior of the feasible space. For \texttt{simple1} we do achieve the global minimum on nearly every iteration, which is in contrast to \texttt{simple2} where we nearly never achieve the global minimum despite always returning a feasible solution. In part this is due to the fact that the combination of exterior and interior methods is not well-suited to the topology of the function. The exterior method forces the optimization to the feasible space, and then the interior method must overcome a massive gradient to reach the global minimum at $(1,1)$, which makes reaching the global minimum incredibly challenging. As an alternative, a method that performs efficient descent should be able to reach the minimum relatively quickly and afterwards an exterior method could be applied to guide the solution to feasibility. 
+
+In Figures \ref{fig:alg1_conv} and \ref{fig:alg2_conv}, we observe relatively clean convergence characteristics of the objective function and maximal constraint violation on \texttt{simple2} (albeit to a non-global minimum) for both variations of the algorithm. While the mixed penalty with logarithmic barrier appears smoother, it is hard to generalize that either algorithm is better than another without looking at a larger statistical estimate of the performance characteristics. Overall, we see a quick reduction in the maximal constraint violation as the solution is guided to feasibility and then a follow-on reduction in the objective function as the interior point method begins to optimize the solution within the feasible space.
+
+Ultimately, the methods we chose were sufficient to achieve near-optimal feasible solutions across a variety of constrained optimization benchmarks.
 
 \end{document}
