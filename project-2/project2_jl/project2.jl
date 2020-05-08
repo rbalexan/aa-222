@@ -23,12 +23,21 @@ Returns:
 """
 function optimize(f, g, c, x0, n, prob)
 
+    # algorithm 1
     exterior_unconstrained_method = NesterovMomentum(1e-3, 0.9, [])
     exterior_method               = PenaltyMethod(1e0, 1e0, 2.0,
                                         quadratic_penalty,
                                         forward_difference_penalty_gradient,
                                         exterior_unconstrained_method, true)
     interior_method               = InteriorPointMethod(1.0, 2.0, inverse_barrier)
+
+    # algorithm 2
+    # exterior_unconstrained_method = NesterovMomentum(1e-3, 0.9, [])
+    # exterior_method               = PenaltyMethod(1e0, 1e0, 2.0,
+    #                                     mixed_penalty,
+    #                                     forward_difference_penalty_gradient,
+    #                                     exterior_unconstrained_method, true)
+    # interior_method               = InteriorPointMethod(1.0, 2.0, log_barrier)
 
     # secret1 has guaranteed feasible start
 

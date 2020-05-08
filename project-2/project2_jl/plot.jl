@@ -6,7 +6,7 @@ include("helpers.jl")
 include("simple.jl")
 
 simple1_plot(x, y) = simple1([x, y])
-simple2_plot(x, y) = simple2([x, y])
+simple2_plot(x, y) = log10(max(simple2([x, y]), 0.01))
 
 simple1_constr1(x, y) = simple1_constraints([x, y])[1]
 simple1_constr2(x, y) = simple1_constraints([x, y])[2]
@@ -16,16 +16,16 @@ simple2_constr2(x, y) = simple2_constraints([x, y])[2]
 
 col = colorant"#424242";
 
-xplot = -3:0.1:3
-yplot = -3:0.1:3
+xplot = -3:0.01:3
+yplot = -3:0.01:3
 
 ## optimization plots
 
 function optimization_plot(f_plot, f_constr1, f_constr2, xplot, yplot, f, g, c, x0, n, prob)
 
     contourf(xplot, yplot, f_plot, aspect_ratio=:equal, size=(600,400), grid=false,
-                xlims=(-3, 3), ylims=(-3, 3), levels=30, box=true,
-                color=cgrad(:vibrant_grad_r, scale=:linear))
+                xlims=(-3, 3), ylims=(-3, 3), clims=(-2,4), #levels=30,
+                box=true, color=cgrad(:vibrant_grad_r, scale=:linear))
 
     contour!(xplot, yplot, f_constr1, levels=[0, 0.001], w=1.5, c=:black)
     contour!(xplot, yplot, f_constr2, levels=[0, 0.001], w=1.5, c=:black)
@@ -52,12 +52,12 @@ end
 # simple 1
 optimization_plot(simple1_plot, simple1_constr1, simple1_constr2, xplot, yplot, simple1,
                 simple1_gradient, simple1_constraints, simple1_init, 5000, "simple1")
-savefig("plots/simple1_alg1_2.svg")
+savefig("plots/simple1_alg1_new.svg")
 
 # simple 2
 optimization_plot(simple2_plot, simple2_constr1, simple2_constr2, xplot, yplot, simple2,
                 simple2_gradient, simple2_constraints, simple2_init, 10000, "simple2")
-savefig("plots/simple2_alg1_2.svg")
+savefig("plots/simple2_alg1_new.svg")
 
 
 # need to make modified optimize function to run a second case
