@@ -72,17 +72,12 @@ We used the Hooke-Jeeves method to descend the penalized objective function in t
 
 \subsection{Results \& Discussion}
 
-%You must compare the performance of at least two algorithms by doing the following.
-
-%For simple1 and simple2, plot the feasible region (where  c(x)≤0 ) on top of a contour plot of  f(x) . Show the path taken by the algorithm for at least three initial conditions on this plot. Make a separate plot for at least two distinct algorithms (four plots). For both problems the axis limits should be (-3, 3).
-%For only simple2, and for at least two distinct algorithms, plot the objective function versus iteration, and maximum constraint violation versus iteration, for at least three initial conditions. Plot the curves for different initial conditions on the same plot, but make a separate plot for the objective and constraint violation, and for each of the two algorithms compared (four plots).
-
-\begin{figure*}[t]
+\begin{figure*}[h]
     \centering
     \includesvg[width=0.49\linewidth]{../plots/simple1_alg1.svg}
     \includesvg[width=0.49\linewidth]{../plots/simple2_alg1.svg}
     \caption{Three constrained optimization paths on the \texttt{simple1} function (\textit{left}) and the \texttt{simple2} function (\textit{right}). The feasible space for \texttt{simple1} is the semi-elliptic region in the center and the feasible space for \texttt{simple2} is the left-half region. For the exterior method, these optimizations use the quadratic penalty method ($\rho=1$, $\gamma=2$) with gradient descent with Nesterov momentum ($\alpha=1\textsc{E}-3$, $\beta=0.9$) and for the interior method, these optimizations use the inverse-barrier interior point method ($\rho=1$, $\gamma=2$) on top of the Hooke-Jeeves method ($\alpha_0=1\textsc{E}-1$, $\gamma=0.5$, $\epsilon=1\textsc{E}-4$, $k_{max}=10$). The color gradations for \texttt{simple2} are the base-10 logarithm of the function values.}
-    \label{fig:simple1_alg1}
+    \label{fig:alg1}
 \end{figure*}
 
 \begin{figure*}[h]
@@ -90,9 +85,29 @@ We used the Hooke-Jeeves method to descend the penalized objective function in t
     \includesvg[width=0.49\linewidth]{../plots/simple1_alg2.svg}
     \includesvg[width=0.49\linewidth]{../plots/simple2_alg2.svg}
     \caption{Three constrained optimization paths on the \texttt{simple1} function (\textit{left}) and the \texttt{simple2} function (\textit{right}). The feasible space for \texttt{simple1} is the semi-elliptic region in the center and the feasible space for \texttt{simple2} is the left-half region. For the exterior method, these optimizations use the mixed penalty method ($\rho_1=1$, $\rho_2=1$, $\gamma=2$) with gradient descent with Nesterov momentum ($\alpha=1\textsc{E}-3$, $\beta=0.9$) and for the interior method, these optimizations use the log-barrier interior point method ($\rho=1$, $\gamma=2$) on top of the Hooke-Jeeves method ($\alpha_0=1\textsc{E}-1$, $\gamma=0.5$, $\epsilon=1\textsc{E}-4$, $k_{max}=10$). The color gradations for \texttt{simple2} are the base-10 logarithm of the function values.}
-    \label{fig:simple1_alg2}
+    \label{fig:alg2}
 \end{figure*}
 
+\begin{figure*}[h]
+    \centering
+    \includesvg[width=0.49\linewidth]{../plots/simple2_fconv_alg1.svg}
+    \includesvg[width=0.49\linewidth]{../plots/simple2_cconv_alg1.svg}
+    \caption{Convergence of objective function (\textit{left}) and the maximal constraint violation (\textit(right)) for three randomly-initialized constrained optimizations on the \texttt{simple2} function. For the exterior method, these optimizations use the quadratic penalty method ($\rho=1$, $\gamma=2$) with gradient descent with Nesterov momentum ($\alpha=1\textsc{E}-3$, $\beta=0.9$) and for the interior method, these optimizations use the inverse-barrier interior point method ($\rho=1$, $\gamma=2$) on top of the Hooke-Jeeves method ($\alpha_0=1\textsc{E}-1$, $\gamma=0.5$, $\epsilon=1\textsc{E}-4$, $k_{max}=10$). The color gradations for \texttt{simple2} are the base-10 logarithm of the function values.}
+    \label{fig:alg1_conv}
+\end{figure*}
+
+\begin{figure*}[h]
+    \centering
+    \includesvg[width=0.49\linewidth]{../plots/simple2_fconv_alg2.svg}
+    \includesvg[width=0.49\linewidth]{../plots/simple2_cconv_alg2.svg}
+    \caption{Convergence of objective function (\textit{left}) and the maximal constraint violation (\textit(right)) for three randomly-initialized constrained optimizations on the \texttt{simple2} function. For the exterior method, these optimizations use the mixed penalty method ($\rho_1=1$, $\rho_2=1$, $\gamma=2$) with gradient descent with Nesterov momentum ($\alpha=1\textsc{E}-3$, $\beta=0.9$) and for the interior method, these optimizations use the log-barrier interior point method ($\rho=1$, $\gamma=2$) on top of the Hooke-Jeeves method ($\alpha_0=1\textsc{E}-1$, $\gamma=0.5$, $\epsilon=1\textsc{E}-4$, $k_{max}=10$).}
+    \label{fig:alg2_conv}
+\end{figure*}
+
+
+%You must compare the performance of at least two algorithms by doing the following.
+
+%For only simple2, and for at least two distinct algorithms, plot the objective function versus iteration, and maximum constraint violation versus iteration, for at least three initial conditions. Plot the curves for different initial conditions on the same plot, but make a separate plot for the objective and constraint violation, and for each of the two algorithms compared (four plots).
 
 % \begin{figure*}
 %     \hfill
