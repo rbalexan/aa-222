@@ -25,7 +25,7 @@
 \begin{document}
 
 
-\title{\LARGE \textbf{Active Learning of Deep Global Metamodels} 
+\title{\LARGE \textbf{Active Learning of Global Metamodels} 
 %\thanks{Ross Alexander is supported by a Stanford Graduate Fellowship (SGF) in Science and Engineering.}
 }
 
@@ -40,21 +40,41 @@
 \maketitle
 
 \section{Project Update}
-\label{sec:introduction}
+\label{sec:update}
 
-We propose to explore neural networks (NNs), Gaussian processes (GPs), and their deep variants (DNNs and DGPs) in global metamodeling tasks with active learning. Global metamodeling is the discipline concerned with constructing a surrogate model over the input space that is optimal with respect to the number of training examples. Traditionally, global metamodels are constructed following detailed sampling schemes. Using these sampling schemes, each of the training examples is evaluated (or labeled) and the global metamodel is constructed using all of the labeled examples. Since these global metamodels generally increase in accuracy with the number of training examples, it is relevant to identify samples that will lead to optimal metamodel accuracy increases utilizing active learning rather than traditional static sampling plans. Active learning in global metamodeling (also called adaptive sampling) can be done in a variety of ways, including mini-batch and sequential sampling.
+% What you have been able to accomplish
+\subsection{Progress So Far}
+Previously, we proposed to explore neural networks (NNs), Gaussian processes (GPs), and their deep variants (DNNs and DGPs) in global metamodeling tasks with active learning. Global metamodeling is the discipline concerned with constructing a surrogate model over the input space that is optimal with respect to the number of training examples. We employ active learning in global metamodeling (also called adaptive sampling) to improve sample efficiency and thus, optimality of the metamodel.
 
-We want to investigate neural networks and Gaussian processes and their deep variants due to the well-demonstrated expressive power of these models. There are some key differences between NNs and GPs that make them worth considering. DNNs and DGPs have grown in popularity due to their principled composability and their ability to learn strongly nonlinear mappings from inputs to latent variables to outputs. This expressivity is manifested in different ways in each model; in DNNs, the choices of activation functions, learning rates, and DNN architectures govern the learned representation, while in DGPs, the choice of mean function, covariance function (kernel), noise variance, and DGP architectures govern the learned representation \cite{Damianou2013DeepProcesses}. While NNs and GPs both have methods for generating the expectation of the input space, GPs also provide methods for generating the variance of the input space. This offers much more flexibility for adaptive sampling objectives. On the other hand, the cost of training a GP using $n$ samples is $\mathcal{O}(n^3)$, which leads to computational intractability when the dataset is large.
+So far, we have implemented variance-based adaptive sampling for GPs on several 1D and 2D functions. First, we generate a small initial set of design points and objective function evaluations (e.g. a dataset $\mathcal{D} = \{(x^{(i)}, y^{(i)})\}$) using a random sampling approach. We provide the initial sample set and fit a GP to the samples. We then evaluate the GP over a uniform grid to determine the next sample location according the variance-based exploration strategy. Following this, we continually add the requested sample, re-fit the GP, and identify a new sample.
 
-There are several relevant adaptive sampling techniques that have emerged from the surrogate optimization discipline \cite{Liu2018ADesign}. Some interesting approaches for GPs are error-based, variance-based, and hybrid error-and-variance-based active learning \cite{Liu2017AnError}. For both NNs and GPs, other adaptive sampling techniques include incremental Latin hypercube sampling (iLHS), and some techniques based on Voronoi cell decomposition: local linear approximation (LOLA-Voronoi), cross-validation (CV-Voronoi), and $k$-fold cross-validation (KFCV-Voronoi) \cite{Eason2014AdaptiveNetworks,Crombecq2009AModeling,Kaminsky2018AdaptiveSurfaces}. We also note mixture-of-experts methods with blending factors as an alternative to reduce GP training time in both low- and high-dimensional design spaces.
+Figure \ref{fig:sinc-gp} shows five iterations of active learning on the 1D $\text{sinc}(x)$ function that was initialized with 12 random samples over the domain. We can see that the variance-based method performs well and quickly learns a good metamodel. Similarly, we show a single iteration of active learning on 2D Franke function in Figure \ref{fig:franke-gp}. We are observing the cubic evaluation complexity, so extensions to higher dimensions is currently limited.
 
-We will evaluate some of these models and adaptive sampling techniques on several general optimization benchmark functions of varying dimensionality and modality. Some useful accuracy metrics are root-mean-squared error (RMSE), integrated squared error (ISE), integrated squared variance (ISV), and integrated variance (IV). We can also report model generation time as a measure of time complexity. There are several machine learning packages for Julia (e.g. \texttt{Flux.jl}, \texttt{Scikit-Learn.jl}) and for Python (e.g. \texttt{Tensorflow}, \texttt{PyTorch}, \texttt{Scikit-Learn}). Additionally, there are several popular GP packages for Julia (e.g. \texttt{GaussianProcesses.jl}, \texttt{Stheno.jl}) and for Python (e.g. \texttt{GPy}, \texttt{GPFlow}, \texttt{GPyTorch}, \texttt{PyDeepGP}). We will likely have to build our own implementation of some adaptive sampling algorithms since these are not as widely proliferated.
+Some new additional directions to explore include generating the initial dataset using a central composite design, which could improve performance by reducing adaptive samples requested on the design space boundaries. Additionally, we may formulate a method to select samples based on expected improvement in integrated variance.
 
-Ultimately, improvements in global metamodeling using active learning on deep representations could lead to increased sample efficiency -- saving time and money across many experimental domains including engineering, biology, computer science.
+% a revised timeline to completion
+\subsection{Work Ahead}
+We should be able to at least complete a comparison between GPs and NNs, between GPs and DGPs, or between GPs with various adaptive sampling approaches. This will require developing the NN or DGP code along with coding up the calculation of performance metrics (i.e. RMSE, ISE, IV, and model generation time). We should have some results for these metamodels and active learning techniques on several general optimization benchmark functions of varying dimensionality and modality.
+
+\vspace*{-2em}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.74\linewidth]{final-project/update/plots/gp-12to20-pt12.png} \vspace*{-1em} \\
+    \includegraphics[width=0.74\linewidth]{final-project/update/plots/gp-12to20-pt13.png} \vspace*{-1em} \\
+    \includegraphics[width=0.74\linewidth]{final-project/update/plots/gp-12to20-pt14.png} \vspace*{-1em} \\
+    \includegraphics[width=0.74\linewidth]{final-project/update/plots/gp-12to20-pt15.png} \vspace*{-1em} \\
+    \includegraphics[width=0.74\linewidth]{final-project/update/plots/gp-12to20-pt16.png} \vspace*{-1em}
+    \caption{Five iterations of variance-based active learning for a Gaussian process on the one-dimensional cardinal sine ($\text{sinc}(x)$) function on $x\in [-5,5]$ initialized with 12 random samples.}
+    \label{fig:sinc-gp}
+\end{figure}
 
 
-\bibliographystyle{IEEEtran}
-\bibliography{proposal}
+\begin{figure*}[h]
+    \centering
+    \includegraphics[width=0.99\linewidth]{final-project/update/plots/gp-20to40-pt23.png}
+    \caption{A single iteration of variance-based active learning for a Gaussian process on the two-dimensional Franke function. The left plots show the predicted mean function and the true function. The right plots show the absolute error between the predicted mean function and the true function and magnitude of the two-sigma estimator from the GP.}
+    \label{fig:franke-gp}
+\end{figure*}
 
 
 \end{document}
