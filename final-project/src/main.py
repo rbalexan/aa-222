@@ -187,12 +187,13 @@ def lola_active_learning(model, f, X_train):
         x_upper = X_train[i + 1, :]
         x_mid   = (x_lower + x_upper) / 2
 
-        y_lower    = model.predict(x_lower)
-        y_upper    = model.predict(x_upper)
+        y_lower    = f(x_lower)
+        y_upper    = f(x_upper)
         y_mid_pred = model.predict(x_mid)
         y_mid_lola = (y_lower + y_upper) / 2
 
         lola_error_ = np.abs(y_mid_pred - y_mid_lola)
+        #print(x_mid, y_mid_lola, y_mid_pred, lola_error_)
 
         if lola_error_ > lola_error:
             lola_error  = lola_error_
@@ -315,9 +316,10 @@ def initialize_neural_network(hidden_units_list):
     for i, hidden_units in enumerate(hidden_units_list):
 
         if i == 0:
-            model.add(Dense(hidden_units, input_dim=1, activation='softplus'))
+            model.add(Dense(hidden_units, input_dim=1, activation='selu'))
+            #model.add(LeakyReLU())
         else:
-            model.add(Dense(hidden_units, activation='softplus'))
+            model.add(Dense(hidden_units, activation='selu'))
 
     model.add(Dense(1, activation=None))
 
@@ -334,11 +336,11 @@ if __name__ == "__main__":
     k_max = 30
     file_prefix = "sinc"
     kernel = RBF()
-    hidden_units = [8, 8, 8]
-    epochs = 2000
+    hidden_units = [32]
+    epochs = 5000
 
-    gp_var_ise,  gp_var_iv  = variance_based_active_learning_gp(sinc, a, b, kernel, k_max, file_prefix + "/gp_variance")
-    gp_lola_ise, gp_lola_iv = lola_active_learning_gp(sinc, a, b, kernel, k_max, file_prefix + "/gp_lola")
+    #gp_var_ise,  gp_var_iv  = variance_based_active_learning_gp(sinc, a, b, kernel, k_max, file_prefix + "/gp_variance")
+    #gp_lola_ise, gp_lola_iv = lola_active_learning_gp(sinc, a, b, kernel, k_max, file_prefix + "/gp_lola")
     nn_lola_ise, nn_lola_iv = lola_active_learning_nn(sinc, a, b, hidden_units, epochs, k_max, file_prefix + "/nn_lola")
 
     a = [0]
@@ -347,8 +349,8 @@ if __name__ == "__main__":
     k_max = 30
     file_prefix = "hebbal"
     kernel = RationalQuadratic()
-    hidden_units = [16]
+    hidden_units = [32]
 
-    gp_var_ise,  gp_var_iv  = variance_based_active_learning_gp(hebbal, a, b, kernel, k_max, file_prefix + "/gp_variance")
-    gp_lola_ise, gp_lola_iv = lola_active_learning_gp(hebbal, a, b, kernel, k_max, file_prefix + "/gp_lola")
-    nn_lola_ise, nn_lola_iv = lola_active_learning_nn(hebbal, a, b, hidden_units, epochs, k_max, file_prefix + "/nn_lola")
+    #gp_var_ise,  gp_var_iv  = variance_based_active_learning_gp(hebbal, a, b, kernel, k_max, file_prefix + "/gp_variance")
+    #gp_lola_ise, gp_lola_iv = lola_active_learning_gp(hebbal, a, b, kernel, k_max, file_prefix + "/gp_lola")
+    #nn_lola_ise, nn_lola_iv = lola_active_learning_nn(hebbal, a, b, hidden_units, epochs, k_max, file_prefix + "/nn_lola")
