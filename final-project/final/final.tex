@@ -1,0 +1,143 @@
+\documentclass[conference]{IEEEtran}
+
+\IEEEoverridecommandlockouts
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{svg}
+
+\usepackage{booktabs} %@{}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.16}
+\usepackage[per-mode=symbol,detect-all]{siunitx}
+\usepackage{hyperref}
+\usepackage{cleveref} %\Cref{} vs. \cref{}
+\usepackage[protrusion=true,expansion=true]{microtype}
+\usepackage{mathabx} % for \bigtimes
+
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+		T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+	
+	
+	\title{\LARGE \textbf{Active Learning for Optimal Sequential Design of Experiments}
+		%\thanks{Ross Alexander is supported by a Stanford Graduate Fellowship (SGF) in Science and Engineering.}
+	}
+	
+	
+	\author{\IEEEauthorblockN{  Ross Alexander}
+		\IEEEauthorblockA{\textit{  Department of Aeronautics and Astronautics} \\
+			\textit{                    Stanford University} \\
+			Stanford, CA 94305 \\
+			rbalexan@stanford.edu}} % or ORCID
+	
+	
+	\maketitle
+	
+	\begin{abstract}
+		%
+	\end{abstract}
+	
+	% \begin{IEEEkeywords}
+	% component, formatting, style, styling, insert
+	% \end{IEEEkeywords}
+	
+	\section{Introduction}
+	\label{sec:introduction}
+	
+	% Overview of topic sentences
+	
+	% What is the problem?  
+	The design of experiments is challenging and complex. In our case, rather than optimizing an objective function, we want to optimize the global metamodel.
+	
+	% Why is it interesting and important?
+	% Why is it hard? Why do naive approaches fail?
+	
+	% Why hasn't it been solved before? (Or, what's wrong with previous proposed solutions? How does mine differ?)
+	
+	% What are the key components of my approach and results? Also include any specific limitations.
+	
+	% Summary of the major contributions in bullet form, mentioning in which sections they can be found. This material doubles as an outline of the rest of the paper, saving space and eliminating redundancy.
+	
+	
+	\section{Related Work}
+	\label{sec:related-work}
+	
+	\cite{Zuluaga2013ActiveOptimization}
+	
+	\section{Background}
+	\label{sec:background}
+	
+	FEature engineering in regression (non-parametric GPs), parametrics NNs that have demonstrated success in modeling functions.
+	
+	% typical GP derivation
+	% prior and posterior predictive distribution 
+	\begin{equation*}
+	GP(m, k)
+	\end{equation*}
+	
+	We hope to compare GPs, DGPs, NNs, and DNNs in the future, but for now we just compare GPs and NNs. Even though we have the Universal Approximation theorem for single-layer NNs, it doesn't say how hard it will be (also activation fns, training, learning rate, optimizer, etc difficulties). GPs have similar issues with kernel choice and composition since there are many possible ways to construct kernels. The MLE of the parameters is a non-convex optimization and so it is possible to be stuck in a local maximum that is not globally optimal
+	
+	\section{Proposed Approach}
+	\label{sec:proposed-approach}
+	
+	We don't know the underlying model and we actually aer trying to identify the interesting points of a model just based on an approximate model that gets increasingly more accurate.
+
+	
+	Random sampling
+	Space-filling (also, low discrepancy sequences (van der Corput, Halton in 2D), show toy example
+	Variance-based
+	Local linear approximation (since deviation from linear implies nonlinearity and is an interesting feature that is worth capturing)
+	
+	\subsection{Sampling Approaches}
+	
+	\subsubsection{Random Sampling}
+	
+	\subsubsection{Quasi-Random Sampling}
+	
+	Quasi-random sequences are deterministic sequences that appear random, but have underlying structure. There are a variety of quasi=random sequences that are designed to be low-discrepancy - van der Corput, Halton, Sobol, additive recurrence.
+	
+	$$D(\mathcal{H})$$
+	
+	We seek a low-discrepancy sequence since it will be the most space-filling an thus the error in modeling the underlying function will converge as quickly as possible compared to purely random sequence.
+	
+	
+	\subsubsection{Variance-Based Active Learning}
+	
+	\subsubsection{Local Linear Approximation-Based Active Learning}
+	
+	\section{Experiments \& Results}
+	\label{sec:experiments-results}
+	
+	While GPs are convenient non-parametric estimators, the choice of mean function, kernel function, and likelihood function can greatly influence the resulting distribution over functions. Active learning should be as non-parametric as possible since it should adapt to an unknown objective.
+	
+	We use a zero-mean function and a Gaussian likelihood function. In order to have a reasonable comparison, we examine a variety of standard kernel functions: constant, radial basis function, Mat\'ern ($\nu = \{1/2, 3/2, 5/2\}$), rational quadratic, and dot product. 
+	
+	Using both the rectified linear unit (ReLU) and scaled exponential linear unit (SELU) activations functions, we train for 10,000 epochs with the Adam optimizer.
+	
+	\begin{figure}[h]
+		\centering
+		%\includesvg[width=0.45\linewidth]{../../src/plots/sinc/gp_variance/kernel_comparison_ise_iter_50_50.svg}
+		\caption{Ablation study of various non-composed covariance functions (kernels) for a Gaussian process with $k=50$ additional samples sequentially selected using variance-based active learning. $n=50$ initial sample schemes using a baseline central composite design (CCD) with a single random sample.}
+	\end{figure}
+	
+	\section{Conclusion}
+	\label{sec:conclusion}
+	
+	
+	\section{Future Work}
+	\label{sec:future-work}
+	
+	
+	
+	\bibliographystyle{IEEEtran}
+	\bibliography{final}
+	
+	
+\end{document}
