@@ -2,7 +2,18 @@ import numpy as np
 
 
 # noinspection PyUnusedLocal
-def variance_based_active_learning(model, f, X_pred, std_pred, X_train):
+def random_sequence_active_learning(model, f, a, b, X_pred, std_pred, X_train):
+
+    # hack for 1D
+    dims = len(a)
+    x_train_new = np.random.random(dims) * (b[0] - a[0]) + a[0]
+    y_train_new = f(x_train_new)
+
+    return x_train_new, y_train_new
+
+
+# noinspection PyUnusedLocal
+def variance_based_active_learning(model, f, a, b, X_pred, std_pred, X_train):
 
     x_train_new = X_pred[np.argmax(std_pred)]
     y_train_new = f(x_train_new)
@@ -11,7 +22,7 @@ def variance_based_active_learning(model, f, X_pred, std_pred, X_train):
 
 
 # noinspection PyUnusedLocal
-def lola_active_learning(model, f, X_pred, std_pred, X_train):
+def lola_active_learning(model, f, a, b, X_pred, std_pred, X_train):
 
     lola_error  = 0.0
     x_train_new = 0.0

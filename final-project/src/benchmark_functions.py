@@ -13,9 +13,17 @@ def hebbal(X):
 
 def step(X):
 
-    if X > 0:
-        y = 1
-    else:
-        y = 0
+    return (X > 0)*1.0 - 0.5
 
-    return y
+
+# http://infinity77.net/global_optimization/test_functions_1d.html
+
+
+def problem15(X):
+    # on [-5, 5]
+    return (np.power(X, 2) - 5*X + 6) / (np.power(X, 2) + 1)
+
+
+def problem20(X):
+    # on [-5, 5]
+    return - (X - np.sin(X)) * np.exp(-np.power(X, 2))
