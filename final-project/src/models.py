@@ -34,7 +34,7 @@ def initialize_neural_network(hidden_units, activation):
     model.add(keras.layers.Dense(1, activation=None))
 
     # specify model loss, optimizer, and initial LR
-    model.compile(loss='mse', optimizer=keras.optimizers.Nadam(learning_rate=0.02), metrics=['mse'])
+    model.compile(loss='mse', optimizer=keras.optimizers.adam(learning_rate=0.01), metrics=['mse'])
 
     return model
 

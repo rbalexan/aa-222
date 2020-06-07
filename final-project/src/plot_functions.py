@@ -79,12 +79,12 @@ def plot_kernel_comparison(ise_kernels, iv_kernels, flags, kernel_labels, fn_pre
     last_ise = np.squeeze(ise_kernels[:, :, -1])
     last_iv  = np.squeeze(iv_kernels[ :, :, -1])
 
-    ise_mean = np.squeeze(np.mean(ise_kernels, axis=1))
-    ise_std  = np.squeeze(np.std( ise_kernels, axis=1))
-    iv_mean  = np.squeeze(np.mean(iv_kernels,  axis=1))
-    iv_std   = np.squeeze(np.std( iv_kernels,  axis=1))
+    ise_mean_log = np.squeeze(np.mean(np.log10(ise_kernels), axis=1))
+    ise_std_log  = np.squeeze(np.std( np.log10(ise_kernels), axis=1))
+    iv_mean_log  = np.squeeze(np.mean(np.log10(iv_kernels),  axis=1))
+    iv_std_log   = np.squeeze(np.std( np.log10(iv_kernels),  axis=1))
 
-    fig = plt.figure(figsize=(9, 6))
+    fig = plt.figure(figsize=(8, 6))
     plt.boxplot(last_ise.T, notch=False, labels=kernel_labels, widths=0.8)
     plt.xlabel("Gaussian Process Kernel")
     plt.yscale("log")
@@ -92,14 +92,14 @@ def plot_kernel_comparison(ise_kernels, iv_kernels, flags, kernel_labels, fn_pre
     plt.grid(True)
     #plt.show()
 
-    filename = "plots/" + fn_prefix + flags[0] + "_" + flags[1] + "/kernel_comparison_ise__{}".format(n_random_trials)\
+    filename = "plots/" + fn_prefix + flags[0] + "_" + flags[1] + "/kernel_comparison_ise_box_{}".format(n_random_trials)\
                + "_{}.svg".format(k_max)
     plt.savefig(filename, dpi=300)
     plt.close(fig)
 
 
     # do for iv
-    fig = plt.figure(figsize=(9, 6))
+    fig = plt.figure(figsize=(8, 6))
     plt.boxplot(last_iv.T, notch=False, labels=kernel_labels, widths=0.8)
     plt.xlabel("Gaussian Process Kernel")
     plt.yscale("log")
@@ -114,11 +114,13 @@ def plot_kernel_comparison(ise_kernels, iv_kernels, flags, kernel_labels, fn_pre
 
 
     # plot log trajectory over iterations with mean and sd
-    fig = plt.figure(figsize=(9, 6))
+    fig = plt.figure(figsize=(8, 6))
     for i, label in enumerate(kernel_labels):
-        plt.fill_between(range(k_max + 1), ise_mean[i, :] + ise_std[i, :], ise_mean[i, :] - ise_std[i, :],
-                         alpha=0.6, lw=0)
-        plt.plot(range(k_max + 1), ise_mean[i, :], label=label)
+        plt.fill_between(range(k_max + 1),
+                         np.power(10, ise_mean_log[i, :] + ise_std_log[i, :]),
+                         np.power(10, ise_mean_log[i, :] - ise_std_log[i, :]),
+                         alpha=0.3, lw=0)
+        plt.plot(range(k_max + 1), np.power(10, ise_mean_log[i, :]), label=label)
 
     plt.xlim((0, k_max))
     plt.xlabel("Iteration")
@@ -129,18 +131,20 @@ def plot_kernel_comparison(ise_kernels, iv_kernels, flags, kernel_labels, fn_pre
     plt.grid(True)
     #plt.show()
 
-    filename = "plots/" + fn_prefix + flags[0] + "_" + flags[1] + "/kernel_comparison_ise_iter_{}".format(n_random_trials) \
-               + "_{}.svg".format(k_max)
+    filename = "plots/" + fn_prefix + flags[0] + "_" + flags[1] + \
+               "/kernel_comparison_ise_iter_{}".format(n_random_trials) + "_{}.svg".format(k_max)
     plt.savefig(filename, dpi=300)
     plt.close(fig)
 
 
     # plot log trajectory over iterations with mean and sd
-    fig = plt.figure(figsize=(9, 6))
+    fig = plt.figure(figsize=(8, 6))
     for i, label in enumerate(kernel_labels):
-        plt.fill_between(range(k_max + 1), iv_mean[i, :] + iv_std[i, :], iv_mean[i, :] - iv_std[i, :],
-                         alpha=0.6, lw=0)
-        plt.plot(range(k_max + 1), iv_mean[i, :], label=label)
+        plt.fill_between(range(k_max + 1),
+                         np.power(10, iv_mean_log[i, :] + iv_std_log[i, :]),
+                         np.power(10, iv_mean_log[i, :] - iv_std_log[i, :]),
+                         alpha=0.3, lw=0)
+        plt.plot(range(k_max + 1), np.power(10, iv_mean_log[i, :]), label=label)
 
     plt.xlim((0, k_max))
     plt.xlabel("Iteration")
@@ -151,8 +155,52 @@ def plot_kernel_comparison(ise_kernels, iv_kernels, flags, kernel_labels, fn_pre
     plt.grid(True)
     #plt.show()
 
-    filename = "plots/" + fn_prefix + flags[0] + "_" + flags[1] + "/kernel_comparison_iv_iter_{}".format(
-        n_random_trials) \
+    filename = "plots/" + fn_prefix + flags[0] + "_" + flags[1] + \
+               "/kernel_comparison_iv_iter_{}".format(n_random_trials) + "_{}.svg".format(k_max)
+    plt.savefig(filename, dpi=300)
+    plt.close(fig)
+
+
+def plot_activation_comparison(ise_activations, flags, activation_labels, fn_prefix, n_random_trials, k_max):
+
+    last_ise = np.squeeze(ise_activations[:, :, -1])
+
+    ise_mean_log = np.squeeze(np.mean(np.log10(ise_activations), axis=1))
+    ise_std_log  = np.squeeze(np.std( np.log10(ise_activations), axis=1))
+
+    fig = plt.figure(figsize=(4, 6))
+    plt.boxplot(last_ise.T, notch=False, labels=activation_labels, widths=0.8)
+    plt.xlabel("Activation Functions")
+    plt.yscale("log")
+    plt.ylabel("Integrated Squared Error")
+    plt.grid(True)
+    #plt.show()
+
+    filename = "plots/" + fn_prefix + flags[0] + "_" + flags[1] + "/activation_comparison_ise_box_{}".format(n_random_trials)\
                + "_{}.svg".format(k_max)
+    plt.savefig(filename, dpi=300)
+    plt.close(fig)
+
+
+    # plot log trajectory over iterations with mean and sd
+    fig = plt.figure(figsize=(8, 6))
+    for i, label in enumerate(activation_labels):
+        plt.fill_between(range(k_max + 1),
+                         np.power(10, ise_mean_log[i, :] + ise_std_log[i, :]),
+                         np.power(10, ise_mean_log[i, :] - ise_std_log[i, :]),
+                         alpha=0.3, lw=0)
+        plt.plot(range(k_max + 1), np.power(10, ise_mean_log[i, :]), label=label)
+
+    plt.xlim((0, k_max))
+    plt.xlabel("Iteration")
+    plt.yscale("log")
+    plt.ylim((1e-12, 1e2))
+    plt.ylabel("Integrated Squared Error")
+    plt.legend()
+    plt.grid(True)
+    #plt.show()
+
+    filename = "plots/" + fn_prefix + flags[0] + "_" + flags[1] + \
+               "/activation_comparison_ise_iter_{}".format(n_random_trials) + "_{}.svg".format(k_max)
     plt.savefig(filename, dpi=300)
     plt.close(fig)
