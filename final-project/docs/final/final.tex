@@ -40,32 +40,25 @@
 	\maketitle
 	
 	\begin{abstract}
-		
+		The design of experiments is the task of designing a one-off sampling scheme over the input space that will efficiently capture variation in the output space. While a static, dense sampling scheme is often easy to design and execute, for many experiments, the cost of evaluating such a sample set can be expensive, time-consuming, or even impossible. In order to improve sample efficiency, we examine the sequential design of experiments, where the task consists of alternating between constructing a surrogate model using the current set of samples and identifying the next sample location utilizing information from the surrogate model. We compare three traditional sampling techniques against two active learning techniques on both Gaussian process (GP) and artificial neural network (NN) surrogate models across a variety of one-dimensional test functions. We find that GP surrogates outperform NN surrogates in sequential design of experiments tasks where the number of samples is limited and when prior information about the latent function can be incorporated into the GP.
 	\end{abstract}
-	
-	% \begin{IEEEkeywords}
-	% component, formatting, style, styling, insert
-	% \end{IEEEkeywords}
 	
 	\section{Introduction}
 	\label{sec:introduction}
 	
-	% Overview of topic sentences
-	
-	% What is the problem?  
-	The design of experiments is a challenging and complex task that requires defining a sampling scheme that can efficiently cover the specified design space and a global metamodel that can capture the variation in the underlying process. While it is often simple to define static sampling plans, such as a full factorial sampling plan or a random sampling plan, these sampling plans can suffer from a lack of scalability or a lack of efficient coverage of the design space. It is important to avoid over-sampling areas of the design space in which there is little variation and also to avoid under-sampling areas of the design space where there is significant nonlinearity. Apart from the sampling scheme, it is critical to select a metamodel that is sufficiently expressive. This can range from a simple linear regression to a neural network.
+	% What is the problem? 
+	The design of experiments (DOE) is a task that focuses on constructing a sampling scheme that, when sampled, explains the variation of an experiment's output space with respect to its input space. Typically, designers choose to sample according to a dense grid, since it is easy to implement by specifying the upper and lower bounds and resolution of the grid. However, in many technical experimental domains (e.g. hypersonic wind tunnel tests, biological cell assays, particle collider tests, etc.), experiments can be expensive, time-consuming, or impossible to evaluate. Thus, traditional design of experiments utilizing dense sampling schemes is often intractable. In order to make these experiments feasible, we must use a more sample-efficient method to generate our sample set. 
 	
 	% Why is it interesting and important?
+	Sequential design of experiments generalizes traditional design of experiments where we repeatedly construct a surrogate model using the current set of samples and then identify the next sample location using evaluations of the current surrogate model. The proposed sample location is sampled in the experiment or simulation and then added to the set of evaluated samples. This process repeats until the model is assumed accurate or until a maximum number of samples have been evaluated. 
+	
 	% Why is it hard? Why do naive approaches fail?
-	In our case, rather than optimizing an objective function, we want to optimize the global metamodel.
-	Sequential design of experiments requires both an expressive metamodel and a
+	While it is easy to define an approach for sequential design of experiments tasks, there are many challenges in achieving good performance in practice. In particular, the experimental designer must choose a surrogate model that can sufficiently captures the variation in the latent (objective) function in unobserved regions of the input space. Moreover, surrogate models typically require prior knowledge about the behavior of the latent function that may be unavailable. Even more challenging is defining the sequential sampling (active learning) approach so that the surrogate model quickly converges to the latent function. It is important to avoid over-sampling areas of the input space in which there is little variation and also to avoid under-sampling areas of the input space where there is significant nonlinearity.
 	
-	% Why hasn't it been solved before? (Or, what's wrong with previous proposed solutions? How does mine differ?)
+	% What are the key components of my approach and results? Also include any specific limitations. % Summary of the major contributions in bullet form, mentioning in which sections they can be found. This material doubles as an outline of the rest of the paper, saving space and eliminating redundancy.
+	In this work, we focus our attention on examining the choice of surrogate model, the incorporation of prior information in the surrogate model, and the choice of active learning approach. We examine Gaussian process (GP) surrogates and neural network (NN) surrogates due to the expressivity of these models. Additionally, we study the effects of a variety of covariance (kernel) functions for GP surrogates and the effects of two activation functions for NN surrogates. We initialize a sample set using a face-centered central composite design (CCD) and then perform active learning on a series of one-dimensional test functions. We explore five sampling approaches, including random sampling, Sobol sequence sampling, Halton sequence sampling, variance-based sampling, and local linear approximation (LOLA) sampling.
 	
-	% What are the key components of my approach and results? Also include any specific limitations.
-	
-	% Summary of the major contributions in bullet form, mentioning in which sections they can be found. This material doubles as an outline of the rest of the paper, saving space and eliminating redundancy.
-	
+	We discuss related work on sequential design of experiments in \Cref{sec:related-work}. In \Cref{sec:background}, we describe several surrogate models and active learning approaches and we elaborate on how these are used in our experiments in \Cref{sec:proposed-approach}. We present the results of several active learning approaches across a variety of surrogate models and test functions in \Cref{sec:experiments-results} and discuss the key findings as they relate to the surrogate models, incorporation of prior information, and active learning approaches in \Cref{sec:conclusion}. In \Cref{sec:future-work} we describe some potential research directions for future work.
 	
 	\section{Related Work}
 	\label{sec:related-work}
@@ -89,7 +82,7 @@
     
     \subsection{Metamodels}
     
-    \subsubsection{Least-Squares Predictors}
+    \subsubsection{Linear Regressors}
     
     Traditional methods involving least-squares regression can be used to fit a model of the objective function using a dataset $\mathcal{D} = \{ (\boldsymbol{x}^{(i)}, \boldsymbol{y}^{(i)}) \}_{i=1}^m$. We model the predictor $\hat f$ as the inner product of the sample $\boldsymbol x \in \mathbb{R}^d$ with the parameter vector $\boldsymbol \theta \in \mathbb{R}^d$:
     \begin{equation}
@@ -110,24 +103,25 @@
 	    \boldsymbol{\theta} = \boldsymbol{\Phi}^+ \boldsymbol{y}
 	\end{equation}
 	
-	feature-mapped regresstion
+	\subsubsection{Gaussian Process Regressors}
 	
 	% typical GP derivation
 	% prior and posterior predictive distribution 
-	\begin{equation*}
-	GP(m, k)
-	\end{equation*}
-	
-	We hope to compare GPs, DGPs, NNs, and DNNs in the future, but for now we just compare GPs and NNs. Even though we have the Universal Approximation theorem for single-layer NNs, it doesn't say how hard it will be (also activation fns, training, learning rate, optimizer, etc difficulties). GPs have similar issues with kernel choice and composition since there are many possible ways to construct kernels. The MLE of the parameters is a non-convex optimization and so it is possible to be stuck in a local maximum that is not globally optimal
-	
-	\subsubsection{Gaussian Process Predictors}
 	
 	We start with a dataset of $m$ input-output pairs that are stored in matrices $\mathbf{X} \in \mathbb{R}^{m \times d_x}$ and $\mathbf{Y} \in \mathbb{R}^{m \times d_y}$ respectively. We then seek to develop an estimator for a latent function $f(\mathbf{x})$ that would generate the outputs $\mathbf{Y}$ given the inputs $\mathbf{X}$.
 	
 	A Gaussian process (GP) is a \cite{williams2006gaussian}.
 	
-	\subsubsection{Artificial Neural Network Predictors}
+	GPs have similar issues with kernel choice and composition since there are many possible ways to construct kernels. The MLE of the parameters is a non-convex optimization and so it is possible to be stuck in a local maximum that is not globally optimal
 	
+	\begin{equation*}
+	GP(m, k)
+	\end{equation*}
+	
+	\subsubsection{Neural Network Regressors}
+	
+	Even though we have the Universal Approximation theorem for single-layer NNs, it doesn't say how hard it will be (also activation fns, training, learning rate, optimizer, etc difficulties). 
+
 	\section{Proposed Approach}
 	\label{sec:proposed-approach}
 	
