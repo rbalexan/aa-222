@@ -261,34 +261,9 @@
 	
 	Typically, using a random initialization would make sense, however, this tends to lead to excessive exploration near the boundaries of the the design space. To mitigate this, we make use of the face-centered central composite design (CCD, or CCF) sampling scheme, which is essentially a full factorial grid over the design space, but with $m=3$ samples along each dimension \cite{CentralCCD}. Once we have obtained these samples, we also add a single random sample to seed the learning of the metamodel. While adding a single random sample is not necessary, it helps us quantify the robustness of active learning approaches.
 	
-    \subsection{Adaptive Sampling Schemes}
+	\subsection{Sequential Sampling Methods}
 	
-	We don't know the underlying model and we actually aer trying to identify the interesting points of a model just based on an approximate model that gets increasingly more accurate.
-
-	
-	\subsubsection{Random Sequence Sampling}
-	
-	\subsubsection{Low-Discrepancy Sequence Sampling}
-	
-	van der Corput / Halton & Sobol
-	
-	Quasi-random sequences are deterministic sequences that appear random, but have underlying structure. 
-	
-	What does discrepancy represent? \cite{kuipers1974uniform}
-	
-	The discrepancy of a set of points $X$ is defined in \Cref{eqn:discrepancy}, which represents the supremum of the absolute difference between the fraction of points in $X$ that are also within hyper-rectangle $\mathcal{H}$ and the Lebesgue measure of the hyper-rectangle $\lambda(\mathcal{H})$.
-	
-	\begin{equation}
-	    \label{eqn:discrepancy}
-	    d(X) = \sup_\mathcal{H} \left| \frac{|X \cap \mathcal{H}|}{|X|} - \lambda(\mathcal{H}) \right|
-	\end{equation}
-
-	Since computing the discrepancy can be quite difficult and minimizing the discrepancy  can be even more challenging, we often settle for low-discrepancy sequences. We seek a low-discrepancy sequence since it will be the most space-filling an thus the error in modeling the underlying function will converge as quickly as possible compared to purely random sequence. There are a variety of quasi-random sequences that are designed to be low-discrepancy - van der Corput, Halton, Sobol, additive recurrence.
-
-	\subsubsection{Variance-Based Active Learning}
-	
-	\subsubsection{Local Linear Approximation-Based Active Learning}
-	Local linear approximation (since deviation from linear implies nonlinearity and is an interesting feature that is worth capturing)
+	As mentioned in \Cref{sec:background}, there are many sequential sampling approaches that we can use. We will test five different sampling approaches including random sampling, Sobol sequence sampling, Halton sequence sampling, variance-based active learning, and local linear approximation (LOLA) active sampling. Neural networks will not be tested on variance-based active learning due to the lack of a variance estimator.
 	    
 	\section{Experiments \& Results}
 	\label{sec:experiments-results}
@@ -307,6 +282,7 @@
 	\section{Conclusion}
 	\label{sec:conclusion}
 	
+	We have shown that GPs are typically more robust surrogate models than NNs for one-dimensional sequential design of experiments problems. While GPs can achieve much lower integrated squared error (ISE) than NNs, this is largely dependent on the choice of kernel function, which may not be able to be selected \textit{a priori}.
 	
 	\section{Future Work}
 	\label{sec:future-work}
