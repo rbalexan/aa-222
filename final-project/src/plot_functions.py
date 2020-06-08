@@ -41,10 +41,13 @@ def plot_general(fig, X_train, y_train, f, x_lims, y_lims, X, x_new, save, filen
     # format plot
     x_w = x_lims[1] - x_lims[0]
     plt.xlim((x_lims[0] - padding * x_w, x_lims[1] + padding * x_w))
+    plt.xlabel("x")
 
     y_w = y_lims[1] - y_lims[0]
     plt.ylim((y_lims[0] - padding * y_w, y_lims[1] + padding * y_w))
+    plt.ylabel("y")
 
+    plt.grid(which='both')
     plt.legend()
 
     if save:
