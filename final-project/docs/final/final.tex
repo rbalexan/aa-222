@@ -218,14 +218,14 @@
 	    \textsc{ZeroMeanStep} & $f(x) = (x > 0) - 0.5 $ & $x \in [-2, 2]$ \\
 	    \bottomrule
 	    \end{tabular}
-	\end{table}
+	\end{table*}
 	
-	\begin{figure}
+	\begin{figure*}[!h]
 	    \centering
-	    \includegraphics{}
+	    \includesvg[width=0.9\linewidth]{../../src/plots/test_functions.svg}
 	    \caption{The set of test functions}
 	    \label{fig:test_fns}
-	\end{figure}
+	\end{figure*}
 	
 	While GPs are convenient non-parametric estimators, the choice of mean function, kernel function, and likelihood function can greatly influence the resulting distribution over functions. Active learning should be as non-parametric as possible since it should adapt to an unknown objective.
 	
