@@ -1,0 +1,257 @@
+\documentclass[conference]{IEEEtran}
+
+\IEEEoverridecommandlockouts
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{svg}
+
+\usepackage{booktabs} %@{}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.16}
+\usepackage[per-mode=symbol,detect-all]{siunitx}
+\usepackage{hyperref}
+\usepackage{cleveref} %\Cref{} vs. \cref{}
+\usepackage[protrusion=true,expansion=true]{microtype}
+\usepackage{mathabx} % for \bigtimes
+
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+		T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+	
+	
+	\title{\LARGE \textbf{Active Learning for Optimal Sequential Design of Experiments}
+		%\thanks{Ross Alexander is supported by a Stanford Graduate Fellowship (SGF) in Science and Engineering.}
+	}
+	
+	
+	\author{\IEEEauthorblockN{  Ross Alexander}
+		\IEEEauthorblockA{\textit{  Department of Aeronautics and Astronautics} \\
+			\textit{                    Stanford University} \\
+			Stanford, CA 94305 \\
+			rbalexan@stanford.edu}} % or ORCID
+	
+	
+	\maketitle
+	
+	\begin{abstract}
+		
+	\end{abstract}
+	
+	% \begin{IEEEkeywords}
+	% component, formatting, style, styling, insert
+	% \end{IEEEkeywords}
+	
+	\section{Introduction}
+	\label{sec:introduction}
+	
+	% Overview of topic sentences
+	
+	% What is the problem?  
+	The design of experiments is a challenging and complex task that requires defining a sampling scheme that can efficiently cover the specified design space and a global metamodel that can capture the variation in the underlying process. While it is often simple to define static sampling plans, such as a full factorial sampling plan or a random sampling plan, these sampling plans can suffer from a lack of scalability or a lack of efficient coverage of the design space. It is important to avoid over-sampling areas of the design space in which there is little variation and also to avoid under-sampling areas of the design space where there is significant nonlinearity. Apart from the sampling scheme, it is critical to select a metamodel that is sufficiently expressive. This can range from a simple linear regression to a neural network.
+	
+	% Why is it interesting and important?
+	% Why is it hard? Why do naive approaches fail?
+	In our case, rather than optimizing an objective function, we want to optimize the global metamodel.
+	Sequential design of experiments requires both an expressive metamodel and a
+	
+	% Why hasn't it been solved before? (Or, what's wrong with previous proposed solutions? How does mine differ?)
+	
+	% What are the key components of my approach and results? Also include any specific limitations.
+	
+	% Summary of the major contributions in bullet form, mentioning in which sections they can be found. This material doubles as an outline of the rest of the paper, saving space and eliminating redundancy.
+	
+	
+	\section{Related Work}
+	\label{sec:related-work}
+	
+	Full factorial, fractional factorial, central composite design, random sampling, uniform projection, stratified sampling, space filling metrics
+	
+	use of active learning techniques: variance based, LOLA, KFCV, LOOCV, other approaches
+	
+	disciplines in which activel learning can be used
+	
+	models that can be used: GPs, NNs, DGPs, DNNs, least-squares linear regression, or feature-mapped LSLR
+	
+	\section{Background}
+	\label{sec:background}
+	
+    non-parametric GPs), parametrics NNs that have demonstrated success in modeling functions.
+    
+    \subsection{Metamodels}
+    
+    \subsubsection{Least-Squares Predictors}
+    
+    Traditional methods involving least-squares regression can be used to fit a model of the objective function using a dataset $\mathcal{D} = \{ (\boldsymbol{x}^{(i)}, \boldsymbol{y}^{(i)}) \}_{i=1}^m$. We model the predictor $\hat f$ as the inner product of the sample $\boldsymbol x \in \mathbb{R}^d$ with the parameter vector $\boldsymbol \theta \in \mathbb{R}^d$:
+    \begin{equation}
+        \hat f(\boldsymbol x) = \boldsymbol \theta ^T \boldsymbol x
+    \end{equation}
+	Since we want to minimize the sum of squared errors between the true outputs and the predicted outputs, we can write:
+	\begin{align}
+	    & \min_{\boldsymbol \theta} || \boldsymbol{y} - \boldsymbol{\hat{y}} ||_2^2 \\ 
+	    & \min_{\boldsymbol \theta} || \boldsymbol{y} - \boldsymbol{X \theta} ||_2^2
+	\end{align}
+	where $\boldsymbol X \in \mathbb{R}^{m \times d}$ is the sample matrix (with samples transposed and then concatenated vertically) and where $\boldsymbol y \in \mathbb{R}^m$ is the output vector (with outputs concatenated vertically). The solution for the parameter vector can be obtained in closed-form using the Moore-Penrose pseudoinverse.
+	\begin{equation}
+	    \boldsymbol{\theta} = \boldsymbol{X}^+ \boldsymbol{y}
+	\end{equation}
+	
+	While linear features can be useful, in practice, the variation in the underlying process can be nonlinear. Using a feature map $\phi: \mathbb{R}^d \mapsto \mathbb{R}^p$ that maps a sample from the natural space in $d$ dimensions to the feature space in $p$ dimensions, where $p > d$, we can again perform linear regression, however in the higher-dimensional feature space. Similarly to above, we can define a predictor $\hat f$ as the inner product of the feature-mapped sample $\boldsymbol{\phi(x)} \in \mathbb{R}^p$ with the parameter vector $\boldsymbol{\theta} \in \mathbb{R}^p$:
+    \begin{equation}
+        \hat f(\boldsymbol{\phi(x)}) = \boldsymbol{\theta}^T \boldsymbol{\phi(x)}
+    \end{equation}
+	Since we want to minimize the sum of squared errors between the true outputs and the predicted outputs, we can write:
+	\begin{align}
+	    & \min_{\boldsymbol \theta} || \boldsymbol{y} - \boldsymbol{\hat{y}} ||_2^2 \\ 
+	    & \min_{\boldsymbol \theta} || \boldsymbol{y} - \boldsymbol{\Phi \theta} ||_2^2
+	\end{align}
+	where $\boldsymbol \Phi \in \mathbb{R}^{m \times p}$ is the transformed sample matrix (with samples transposed and then concatenated vertically) and where $\boldsymbol y \in \mathbb{R}^m$ is the output vector (with outputs concatenated vertically). The solution for the parameter vector can be obtained in closed-form using the Moore-Penrose pseudoinverse.
+	\begin{equation}
+	    \boldsymbol{\theta} = \boldsymbol{X}^+ \boldsymbol{y}
+	\end{equation}
+	
+	feature-mapped regresstion
+	
+	% typical GP derivation
+	% prior and posterior predictive distribution 
+	\begin{equation*}
+	GP(m, k)
+	\end{equation*}
+	
+	We hope to compare GPs, DGPs, NNs, and DNNs in the future, but for now we just compare GPs and NNs. Even though we have the Universal Approximation theorem for single-layer NNs, it doesn't say how hard it will be (also activation fns, training, learning rate, optimizer, etc difficulties). GPs have similar issues with kernel choice and composition since there are many possible ways to construct kernels. The MLE of the parameters is a non-convex optimization and so it is possible to be stuck in a local maximum that is not globally optimal
+	
+	\subsubsection{Gaussian Process Predictors}
+	
+	We start with a dataset of $m$ input-output pairs that are stored in matrices $\mathbf{X} \in \mathbb{R}^{m \times d_x}$ and $\mathbf{Y} \in \mathbb{R}^{m \times d_y}$ respectively. We then seek to develop an estimator for a latent function $f(\mathbf{x})$ that would generate the outputs $\mathbf{Y}$ given the inputs $\mathbf{X}$.
+	
+	A Gaussian process (GP) is a \cite{williams2006gaussian}.
+	
+	\subsubsection{Artificial Neural Network Predictors}
+	
+	\section{Proposed Approach}
+	\label{sec:proposed-approach}
+	
+	Gaussian processes are suitable for modelling small datasets where some prior knowledge of the generative process exists. GPs do require assumptions about the functional form of the underlying response. GPs do not scale well in terms of dimensionality. They may provide well calibrated uncertainty output.
+
+    Neural networks are, on the other hand, more suitable for large and very large data sets where little knowledge about the underlying process or suitable features exist. NNs scale well. Work is being done to enable neural networks to output calibrated uncertainty estimates.
+	
+	\subsection{Initial Sampling Scheme}
+	
+	CCD + random sample
+	versus a random sample, CCD prevents unnecessary exploration near the boundaries by seeding the sample near the boundaries as well as the center. It is a full factorial plan, but with $m=3$ along each dimension.
+	
+    \subsection{Adaptive Sampling Scheme}
+	
+	
+	We don't know the underlying model and we actually aer trying to identify the interesting points of a model just based on an approximate model that gets increasingly more accurate.
+
+	Random sampling
+	Space-filling (also, low discrepancy sequences (van der Corput, Halton in 2D), show toy example
+	Variance-based
+	Local linear approximation (since deviation from linear implies nonlinearity and is an interesting feature that is worth capturing)
+	
+	\subsubsection{Random Sampling}
+	
+	\subsubsection{Quasi-Random Sampling}
+	
+	Quasi-random sequences are deterministic sequences that appear random, but have underlying structure. 
+	
+	What does discrepancy represent? \cite{kuipers1974uniform}
+	
+	The discrepancy of a set of points $X$ is defined in \Cref{eqn:discrepancy}, which represents the supremum of the absolute difference between the fraction of points in $X$ that are also within hyper-rectangle $\mathcal{H}$ and the Lebesgue measure of the hyper-rectangle $\lambda(\mathcal{H})$.
+	
+	\begin{equation}
+	    \label{eqn:discrepancy}
+	    d(X) = \sup_\mathcal{H} \left| \frac{|X \cap \mathcal{H}|}{|X|} - \lambda(\mathcal{H}) \right|
+	\end{equation}
+
+	Since computing the discrepancy can be quite difficult and minimizing the discrepancy  can be even more challenging, we often settle for low-discrepancy sequences. We seek a low-discrepancy sequence since it will be the most space-filling an thus the error in modeling the underlying function will converge as quickly as possible compared to purely random sequence. There are a variety of quasi-random sequences that are designed to be low-discrepancy - van der Corput, Halton, Sobol, additive recurrence.
+	
+	\subsubsection{Variance-Based Active Learning}
+	
+	\subsubsection{Local Linear Approximation-Based Active Learning}
+	
+	\subsection{GP Kernels}
+	
+	We plan to examine a variety of kernels. GPs are non-parametric, but require some assumptions. Isotropic kernels with a constant $\ell$ for all dimensions.
+	    
+    \begin{table*}[!h]
+    \renewcommand{\arraystretch}{2.2}
+    \centering
+    \caption{Gaussian Process Kernels}
+    \label{tab:gp_kernels}
+        \begin{tabular}{lll}
+        \toprule 
+        \bfseries Kernel & \bfseries Equation & \bfseries Hyperparameters \\ \midrule
+	    Constant &  $k(\mathbf{x}, \mathbf{x}') = \sigma_0^2$ & $\sigma_0^2 \in [0, \infty)$ \\
+	    Dot product & $k(\mathbf{x}, \mathbf{x}') = \sigma_0^2 + \mathbf{x}^T \mathbf{x}'$ & $\sigma_0^2 \in [0, \infty)$ \\
+	    Squared exponential (RBF) & $k(\mathbf{x}, \mathbf{x}') = \exp \left( -\frac{||\mathbf{x} - \mathbf{x}'||_2^2}{2\ell^2} \right)$ & $\ell \in (0, \infty)$ \\
+	    Rational quadratic & $k(\mathbf{x}, \mathbf{x}') = \left(1+\frac{||\mathbf{x} - \mathbf{x}'||_2^2}{2\alpha \ell^2}\right)^{-\alpha}$ & $\ell, \alpha \in (0, \infty)$ \\
+	    Mat\'ern & $k(\mathbf{x}, \mathbf{x}') = \frac{1}{\Gamma(\nu)2^{\nu-1}}\left(\frac{\sqrt{2\nu}}{l} ||\mathbf{x} - \mathbf{x}'||_2^2 \right)^\nu K_\nu\left(\frac{\sqrt{2\nu}}{l} ||\mathbf{x} - \mathbf{x}'||_2^2 \right)$ & $\nu \in (0, \infty)$ \\ \bottomrule
+	    \end{tabular}
+	\end{table*}
+	
+	\section{Experiments \& Results}
+	\label{sec:experiments-results}
+	
+	\subsection{Test Functions}
+	
+	\begin{table*}[!h]
+    \renewcommand{\arraystretch}{1.3}
+    \centering
+    \caption{Test Functions}
+    \label{tab:test_fns}
+        \begin{tabular}{lll}
+        \toprule 
+        \bfseries Name & \bfseries Function & \bfseries Domain \\ \midrule
+	    \textsc{Hebbal} & $f(x) = -0.5 \sin\left(40 (x-0.85)^4\right) \cos(2(x-0.95)) + 0.5(x-0.9) + 1$ & $x \in [0, 1]$ \\
+	    \textsc{Problem15} & $f(x) = (x^2 - 5x + 6) / (x^2 + 1) $ & $x \in [-5, 5]$ \\
+	    \textsc{Problem20} & $f(x) = -(x - \sin(x))\exp(-x^2) $ & $x \in [-5, 5]$ \\
+	    \textsc{Sinc} & $f(x) = \text{sinc}(x) $ & $x \in [-5, 5]$ \\
+	    \textsc{SincShifted} & $f(x) = \text{sinc}(x) $ & $x \in [-5, 15]$ \\
+	    \textsc{ZeroMeanStep} & $f(x) = (x > 0) - 0.5 $ & $x \in [-2, 2]$ \\
+	    \bottomrule
+	    \end{tabular}
+	\end{table}
+	
+	\begin{figure}
+	    \centering
+	    \includegraphics{}
+	    \caption{The set of test functions}
+	    \label{fig:test_fns}
+	\end{figure}
+	
+	While GPs are convenient non-parametric estimators, the choice of mean function, kernel function, and likelihood function can greatly influence the resulting distribution over functions. Active learning should be as non-parametric as possible since it should adapt to an unknown objective.
+	
+	We use a zero-mean function and a Gaussian likelihood function. In order to have a reasonable comparison, we examine a variety of standard kernel functions: constant, radial basis function, Mat\'ern ($\nu = \{1/2, 3/2, 5/2\}$), rational quadratic, and dot product. 
+	
+	kernel functions
+	
+	Using both the rectified linear unit (ReLU) and scaled exponential linear unit (SELU) activations functions, we train for 10,000 epochs with the Adam optimizer.
+	
+	\begin{figure}[h]
+		\centering
+		\includesvg[width=\linewidth]{../../src/plots/sinc/gp_variance/kernel_comparison_ise_iter_50_50.svg}
+		\caption{Ablation study of various non-composed covariance functions (kernels) for a Gaussian process with $k=50$ additional samples sequentially selected using variance-based active learning. $n=50$ initial sample schemes using a baseline central composite design (CCD) with a single random sample.}
+	\end{figure}
+	
+	\section{Conclusion}
+	\label{sec:conclusion}
+	
+	
+	\section{Future Work}
+	\label{sec:future-work}
+	
+	
+	
+	\bibliographystyle{IEEEtran}
+	\bibliography{final}
+	
+	
+\end{document}
