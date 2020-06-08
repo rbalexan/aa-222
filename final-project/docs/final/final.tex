@@ -20,6 +20,7 @@
 \usepackage{mathabx} % for \bigtimes
 
 \DeclareMathOperator{\sinc}{sinc}
+\DeclareMathOperator{\argmax}{arg~max}
 
 \def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
 		T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
@@ -40,7 +41,7 @@
 	\maketitle
 	
 	\begin{abstract}
-		The design of experiments is the task of designing a one-off sampling scheme over the input space that will efficiently capture variation in the output space. While a static, dense sampling scheme is often easy to design and execute, for many experiments, the cost of evaluating such a sample set can be expensive, time-consuming, or even impossible. In order to improve sample efficiency, we examine the sequential design of experiments, where the task consists of alternating between constructing a surrogate model using the current set of samples and identifying the next sample location utilizing information from the surrogate model. We compare three traditional sampling techniques against two active learning techniques on both Gaussian process (GP) and artificial neural network (NN) surrogate models across a variety of one-dimensional test functions. We find that GP surrogates outperform NN surrogates in sequential design of experiments tasks where the number of samples is limited and when prior information about the latent function can be incorporated into the GP.
+		The design of experiments is the task of designing a one-shot sampling scheme over the input space that will efficiently capture variation in the output space. While a static, dense sampling scheme is often easy to design and execute, for many experiments, the cost of evaluating such a sample set can be expensive, time-consuming, or even impossible. In order to improve sample efficiency, we examine the sequential design of experiments, where the task consists of alternating between constructing a surrogate model using the current set of samples and identifying the next sample location utilizing information from the surrogate model. We compare three traditional sampling techniques against two active learning techniques on both Gaussian process (GP) and artificial neural network (NN) surrogate models across a variety of one-dimensional test functions. We find that GP surrogates outperform NN surrogates in sequential design of experiments tasks where the number of samples is limited and when prior information about the latent function can be incorporated into the GP.
 	\end{abstract}
 	
 	\section{Introduction}
@@ -62,6 +63,7 @@
 	    \includesvg[width=0.51\linewidth]{../../src/plots/model_0_5.svg}
 	    \caption{Six iterations of variance-based active learning on the Hebbal function \cite{hebbal2019bayesian} using a Gaussian process surrogate model with a zero mean function and a rational quadratic covariance function.}
 	    \label{fig:sdoe_diagram}
+	    \vspace*{-1em}
 	\end{figure}
 	
 	% Why is it hard? Why do naive approaches fail?
@@ -75,75 +77,77 @@
 	\section{Background}
 	\label{sec:background}
 	
-	Design of experiments is a natural part of every experimental domain.
+	The design of experiments is a natural part of every experimental domain and finds use across many disciplines. As a result, a wide variety of approaches to the design of experiments has emerged. The groups can be broadly separated by their choice of sample selection scheme and the choice of surrogate model.
 	
-	disciplines in which activel learning can be used
+	\subsection{Sample Selection Schemes}
 	
-	models that can be used: GPs, NNs, DGPs, DNNs, least-squares linear regression, or feature-mapped LSLR
+	\subsubsection{Static Sampling Techniques}
+	Static sampling techniques are essentially one-shot sampling schemes. The most widely known is the full factorial sampling scheme, which gives a dense grid over the input space. Full factorial sampling requires a number of samples that is exponential with the number of dimensions, which can be prohibitive. Another approach called fractional factorial sampling seeks to reduce the sample complexity \cite{george2005statistics}. 
 	
-	rational functions \cite{Hendrickx2005SequentialMetamodelling}
-	radial basis functions \cite{Mackman2010InvestigationFunctions}
-	Lipschitzian approaches \cite{Lovison2010AdaptiveMetamodeling}
-	Gaussian process regression \cite{Simpson2001SamplingAnalysis,VanBeers2005KrigingOverview} and deep GPs \cite{Damianou2013DeepProcesses} 
-	neural networks \cite{Eason2014AdaptiveNetworks} and deep neural networks
+	Due to the exponential sample complexity of dense factorial sampling plans, sparse sampling plans were developed with better sample complexities. Uniform projection sampling plans sparsely generate samples over a uniform grid such that the projections of the sample set is uniform along each dimension \cite{Kochenderfer2019AlgorithmsOptimization}. While uniform projection plans can be useful, they can sometimes fill the input space poorly (consider a diagonal in two-dimensional grid). To improve on this, some low-discrepancy (space-filling) quasi-random sequences, such as the Sobol sequence and the Halton sequence serve as useful alternatives \cite{Sobol1967OnIntegrals,Halton1964AlgorithmSequence}. Sample sequences from second-order (two-dimensional) Sobol and Halton sequences are shown in \Cref{fig:sobol_halton}.
 	
-	sampling techniques: Full factorial, fractional factorial, central composite design, random sampling, uniform projection, stratified sampling, space filling metrics
+	\begin{figure}[htbp]
+	    \centering
+	    \includesvg[width=0.49\linewidth]{plots/Sobol_sequence_2D.svg}
+	    \includesvg[width=0.49\linewidth]{plots/Halton_sequence_2D.svg}
+	    \caption{Plots of the first 256 samples of the 2,3 Sobol sequence (left) and the 2,3 Halton sequence (right) \cite{SobolSequence,HaltonSequence}.}
+	    \label{fig:sobol_halton}
+	\end{figure}
 	
-	use of active learning techniques: variance based, LOLA, KFCV, LOOCV, other apprches
-	r
-	
-	Gaussian processes are suitable for modelling small datasets where some prior knowledge of the generative process exists. GPs do require assumptions about the functional form of the underlying response. GPs do not scale well in terms of dimensionality. They may provide well calibrated uncertainty output.
-
-    Neural networks are, on the other hand, more suitable for large and very large data sets where little knowledge about the underlying process or suitable features exist. NNs scale well. Work is being done to enable neural networks to output calibrated uncertainty estimates.
-    
-    models that have demonstrated success in modeling functions.
-    
-    \subsection{Metamodels}
-    
-    \subsubsection{Linear Regressors}
-    
-    Traditional methods involving least-squares regression can be used to fit a model of the objective function using a dataset $\mathcal{D} = \{ (\boldsymbol{x}^{(i)}, \boldsymbol{y}^{(i)}) \}_{i=1}^m$. We model the predictor $\hat f$ as the inner product of the sample $\boldsymbol x \in \mathbb{R}^d$ with the parameter vector $\boldsymbol \theta \in \mathbb{R}^d$:
+    \subsubsection{Adaptive Sampling Techniques}	
+    Also called active learning techniques, adaptive sampling techniques identify the next sample based on a metric computed over the surrogate model. For Gaussian process surrogates with predicted mean $\hat{\mu}(\boldsymbol{x})$ and predicted variance $\hat{\sigma}^2({\boldsymbol{x}})$, one convenient technique is variance-based active learning, where the next sample is identified as the sample location with the largest predicted variance.
     \begin{equation}
-        \hat f(\boldsymbol x) = \boldsymbol \theta ^T \boldsymbol x
+        \boldsymbol{x}^{(m+1)} = \arg\max_{\boldsymbol{x}\in\mathcal{X}} \hat{\sigma}^2(\boldsymbol{x})
     \end{equation}
-	Using a sum-squared-error loss function, the minimizer can be obtained in closed-form using the Moore-Penrose pseudoinverse.
+    
+    While the above approach is exclusive to Gaussian processes, many other techniques can be used for non-probabilistic models and probabilistic models alike. Another active learning is the local linear approximation (LOLA) sampling \cite{article}. We discuss only the one-dimensional case and invite the interested reader to review the higher-dimensional cases in the listed reference. In essence, LOLA identifies samples that would have the largest error between the midpoint of a linear approximation generated using neighboring samples and the surrogate model's prediction at that midpoint. Assuming a sorted sample set where $\boldsymbol{\bar{x}}^{(i,i+1)} = (\boldsymbol{x}^{(i)} + \boldsymbol{x}^{(i+1)}) / 2$, and $\bar{y}^{(i,i+1)} = (y^{(i)} + y^{(i+1)})/2$ the next sample is given by:
+    \begin{equation}
+         \boldsymbol{x}^{(m+1)} = \arg \max_{\boldsymbol{\bar{x}}^{(i,i+1)}} \left| \bar{y}^{(i,i+1)} - \hat{f}\left(\boldsymbol{\bar{x}}^{(i,i+1)}\right) \right| \quad i \in {1, ..., m-1}
+    \end{equation}
+    Since the surrogate model is in error from a linear approximation, LOLA guides the identification of samples toward predicted nonlinear regions. There are some slight issues with aliasing when the predicted model is close to the linear approximation at the midpoint, which we observe and discuss later in \Cref{sec:experiments-results}.
+    
+    Some other techniques for active learning involve using $k$-fold or leave-one-out cross-validation (KFCV, LOOCV) where samples are selected in the neighborhood of points in the fold with large cross-validation error \cite{Kaminsky2018AdaptiveSurfaces} and other techniques that take a Lipschitzian approach \cite{Lovison2010AdaptiveMetamodeling}.
+
+    \subsection{Surrogate Models}
+    
+    There are many choices for surrogate models, though some important classes include linear functions, rational functions \cite{Hendrickx2005SequentialMetamodelling}, radial basis functions (RBFs) \cite{Mackman2010InvestigationFunctions}, Gaussian processes (GPs) \cite{Simpson2001SamplingAnalysis,VanBeers2005KrigingOverview}, and artificial neural networks (NNs) \cite{Eason2014AdaptiveNetworks}. Herein, we will discuss Gaussian process and neural network surrogates as these models have demonstrated success in modeling broad classes of functions. A detailed discussion of Gaussian processes in given in \cite{williams2006gaussian}.
+	
+	\subsubsection{Gaussian Processes (GPs)}
+
+	We start with a dataset of $m$ input-output pairs that are stored in matrices $\mathbf{X} \in \mathbb{R}^{m \times d}$ and $\mathbf{y} \in \mathbb{R}^{m}$ respectively. We then seek to develop an estimator for a latent function $f(\mathbf{x})$ that would generate the outputs $\mathbf{y}$ given the inputs $\mathbf{X}$. We model the data generation process as
 	\begin{equation}
-	    \boldsymbol{\theta} = \boldsymbol{X}^+ \boldsymbol{y}
+	    y^{(i)} = f(\boldsymbol{x}^{(i)}) + \epsilon \qquad \text{where~}\epsilon \sim \mathcal{N}(0, \sigma^2 \boldsymbol{I})
 	\end{equation}
-	where $\boldsymbol X \in \mathbb{R}^{m \times d}$ is the sample matrix (with samples transposed and then concatenated vertically) and where $\boldsymbol y \in \mathbb{R}^m$ is the output vector (with outputs concatenated vertically). 
-
-	While linear features can be useful, in practice, the variation in the underlying process can be nonlinear. Using a feature map $\phi: \mathbb{R}^d \mapsto \mathbb{R}^p$ that maps a sample from the natural space in $d$ dimensions to the feature space in $p$ dimensions, where $p > d$, we can again perform linear regression, however in the higher-dimensional feature space. Similarly to above, we can define a predictor $\hat f$ as the inner product of the feature-mapped sample $\boldsymbol{\phi(x)} \in \mathbb{R}^p$ with the parameter vector $\boldsymbol{\theta} \in \mathbb{R}^p$:
-    \begin{equation}
-        \hat f(\boldsymbol{\phi(x)}) = \boldsymbol{\theta}^T \boldsymbol{\phi(x)}
-    \end{equation}
-    which can be similarly solved in a closed form where $\boldsymbol \Phi \in \mathbb{R}^{m \times p}$ is the transformed sample matrix (with samples transposed and then concatenated vertically).
-    \begin{equation}
-	    \boldsymbol{\theta} = \boldsymbol{\Phi}^+ \boldsymbol{y}
+	and we model the latent function as
+	\begin{equation}
+	    f(\boldsymbol{x}) \sim \mathcal{GP}(0, k(\boldsymbol{x}, \boldsymbol{x}'))
 	\end{equation}
+	\textit{assuming a zero mean function and a specific covariance function $k$}.
 	
-	\subsubsection{Gaussian Process Regressors}
-	
-	% typical GP derivation
-	% prior and posterior predictive distribution 
-	
-	We start with a dataset of $m$ input-output pairs that are stored in matrices $\mathbf{X} \in \mathbb{R}^{m \times d_x}$ and $\mathbf{Y} \in \mathbb{R}^{m \times d_y}$ respectively. We then seek to develop an estimator for a latent function $f(\mathbf{x})$ that would generate the outputs $\mathbf{Y}$ given the inputs $\mathbf{X}$.
-	
-	A Gaussian process (GP) is a \cite{williams2006gaussian}.
-	
-	GPs have similar issues with kernel choice and composition since there are many possible ways to construct kernels. The MLE of the parameters is a non-convex optimization and so it is possible to be stuck in a local maximum that is not globally optimal
-	
-	\begin{equation*}
-	GP(m, k)
-	\end{equation*}
-	
-	\subsubsection{Neural Network Regressors}
-	
-	Even though we have the Universal Approximation theorem for single-layer NNs, it doesn't say how hard it will be (also activation fns, training, learning rate, optimizer, etc difficulties). 
+	Using the properties of Gaussian distributions, the conditional distribution of $\hat{\boldsymbol{y}} \mid \boldsymbol{y}$ can be shown to be Gaussian with the following predicted mean and variance (using $\boldsymbol{K}$ as the kernel matrix between two sets of samples):
+	\begin{align}
+	    \hat{\mu}(\boldsymbol{x}) &= m(\boldsymbol{x}) + \boldsymbol{K}(\boldsymbol{x}, \boldsymbol{X})\boldsymbol{K}(\boldsymbol{X}, \boldsymbol{X})^{-1}(\boldsymbol{y} - m(\boldsymbol{X})) \\
+	    \hat{\sigma}^2(\boldsymbol{x}) &= \boldsymbol{K}(\boldsymbol{x}, \boldsymbol{x}) - \boldsymbol{K}(\boldsymbol{x}, \boldsymbol{X})\boldsymbol{K}(\boldsymbol{X}, \boldsymbol{X})^{-1}\boldsymbol{K}(\boldsymbol{X}, \boldsymbol{x})
+	\end{align}
+    We can fit Gaussian process parameters (mean function and kernel function parameters) using maximum likelihood estimation (MLE) with gradient ascent. 
 
+    While Gaussian processes tend to work well on small datasets and can give probabilistic estimates of the underlying function, they also require modeling assumptions about the mean and covariance of the underlying function. In the case of the design of experiments, it is worthwhile to consider an approach where we may not have prior information about the behavior of the latent function.
+    
+    \subsubsection{Neural Networks (NNs)}
+    
+    Given a similar dataset of $m$ input-output pairs that are stored in matrices $\mathbf{X} \in \mathbb{R}^{m \times d}$ and $\mathbf{y} \in \mathbb{R}^{m}$ respectively, we seek to develop an estimator for a latent function $f(\mathbf{x})$ that would generate the outputs $\mathbf{y}$ given the inputs $\mathbf{X}$. Our estimator will be a single-layer neural network with weights and biases of the $i$th layer as $W^{[i]}$ and $b^{[i]}$ and the activation function $\sigma$:
+    \begin{align}
+        \hat{y} &= W^{[2]}a^{[1]} + b^{[2]} \\
+        a^{[1]} &= \sigma(W^{[1]}x + b^{[1]})
+    \end{align}
+    We train the neural network by minimizing the mean squared error between the predicted outputs and the true outputs through gradient descent.
+    
+    In comparison to GPs, neural networks benefit from a minimal need for prior knowledge about the latent function. However, neural networks typically require large datasets to learn suitable features. 
+    
 	\section{Proposed Approach}
 	\label{sec:proposed-approach}
 	
-	We explore several active learning approaches on various test functions, metamodels, initial sample schemes, and sequential active learning approaches.
+	We explore several active learning approaches on various test functions, surrogate models, initial sample schemes, and sequential active learning approaches.
 	
 	\subsection{Test Functions}
 	
@@ -251,6 +255,8 @@
 	    \label{fig:activ_fns}
 	\end{figure}
 	
+	Even though we have the Universal Approximation theorem for single-layer NNs, it doesn't say how hard it will be (also activation fns, training, learning rate, optimizer, etc difficulties). 
+	
 	\subsection{Initial Sampling Scheme}
 	
 	Typically, using a random initialization would make sense, however, this tends to lead to excessive exploration near the boundaries of the the design space. To mitigate this, we make use of the face-centered central composite design (CCD, or CCF) sampling scheme, which is essentially a full factorial grid over the design space, but with $m=3$ samples along each dimension \cite{CentralCCD}. Once we have obtained these samples, we also add a single random sample to seed the learning of the metamodel. While adding a single random sample is not necessary, it helps us quantify the robustness of active learning approaches.
@@ -310,7 +316,7 @@
 	
 	Another areas of focus for future work could be on implementing and examining the performance of the neural network Gaussian process (NNGP), which uses a neural network kernel function to model the prediction process of a Bayesian neural network (BNN).
 	
-	An important direction for future work is the extension of the experiments to deep Gaussian processes (DGPs) and deep neural networks (DNNs). The expressivity and principled composability of DGPs and DNNs may lead to significant improvements over their shallow counterparts in cases when there are sufficiently large datasets. We foresee great improvement particularly in high-dimensional spaces, where large dataset will be necessary in order to efficiently construct a surrogate model that can capture the underlying variation in the latent function.
+	An important direction for future work is the extension of the experiments to deep Gaussian processes (DGPs) and deep neural networks (DNNs) \cite{Damianou2013DeepProcesses}. The expressivity and principled composability of DGPs and DNNs may lead to significant improvements over their shallow counterparts in cases when there are sufficiently large datasets. We foresee great improvement particularly in high-dimensional spaces, where large dataset will be necessary in order to efficiently construct a surrogate model that can capture the underlying variation in the latent function.
 	
 	
 	\bibliographystyle{IEEEtran}
