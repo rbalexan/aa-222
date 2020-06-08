@@ -1,4 +1,3 @@
-import numpy as np
 import matplotlib.pyplot as plt
 from sampling import ndgrid
 from benchmark_functions import sinc, hebbal, step, problem15, problem20
