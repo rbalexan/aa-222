@@ -17,23 +17,23 @@ if __name__ == "__main__":
     np.random.seed(0)
 
     # for all f in a list
-    f = step  # f = problem15  # f = sinc         # f = step  # f = hebbal  # f = sinc
-    a = [-2]  # a = [-5]       # a = [-5]         # a = [-2]  # a = [0]     # a = [-5]
-    b = [2]  # b = [5]        # b = [15]         # b = [2]   # b = [1]     # b = [5]
-    fn_prefix = "step/"  # "problem15/"   # "sinc_shifted/"  # "step/"   # "hebbal/"   # "sinc/"
+    f = hebbal  # f = problem15  # f = sinc         # f = step  # f = hebbal  # f = sinc
+    a = [0]  # a = [-5]       # a = [-5]         # a = [-2]  # a = [0]     # a = [-5]
+    b = [1]  # b = [5]        # b = [15]         # b = [2]   # b = [1]     # b = [5]
+    fn_prefix = "hebbal/"  # "problem15/"   # "sinc_shifted/"  # "step/"   # "hebbal/"   # "sinc/"
 
-    n_random_trials = 50
-    k_max = 50
+    n_random_trials = 1
+    k_max = 5
 
     # method sweep
     surrogate_models        = ['gp']
-    active_learning_methods = [halton_sequence_active_learning, sobol_sequence_active_learning]  # [lola_active_learning, random_sequence_active_learning, variance_based_active_learning]
-    active_learning_flags   = ['halton', 'sobol']  # ['lola', 'random', 'variance']
+    active_learning_methods = [variance_based_active_learning]  # [halton_sequence_active_learning, sobol_sequence_active_learning]  # [lola_active_learning, random_sequence_active_learning, variance_based_active_learning]
+    active_learning_flags   = ['variance']  # ['halton', 'sobol']  # ['lola', 'random', 'variance']
 
     # gp parameters
-    kernels = [ConstantKernel(), RBF(), Matern(nu=1/2), Matern(nu=3/2), Matern(nu=5/2), RationalQuadratic(), DotProduct()]
-    kernel_flags  = ['constant', 'rbf', 'matern12',   'matern32',   'matern52',   'rationalquad', 'dot']
-    kernel_labels = ['Constant', 'RBF', 'Matérn-1/2', 'Matérn-3/2', 'Matérn-5/2', 'RQ',           'Dot Prod.']
+    kernels = [RationalQuadratic()]  # kernels = [ConstantKernel(), RBF(), Matern(nu=1/2), Matern(nu=3/2), Matern(nu=5/2), RationalQuadratic(), DotProduct()]
+    kernel_flags = ['rationalquad']  # kernel_flags  = ['constant', 'rbf', 'matern12',   'matern32',   'matern52',   'rationalquad', 'dot']
+    kernel_labels = ['RQ']  # kernel_labels = ['Constant', 'RBF', 'Matérn-1/2', 'Matérn-3/2', 'Matérn-5/2', 'RQ',           'Dot Prod.']
 
     # nn parameters
     activations                   = ['relu', 'selu']
@@ -93,10 +93,10 @@ if __name__ == "__main__":
                             gp = fit_gaussian_process(X_train, y_train, kernel)
 
                             # plot if desired
-                            if k % k_max == 0:
-                                filename = "plots/" + file_prefix + "/model_{}".format(n) + "_{}.svg".format(k)
-                                plot_model(flags, gp, X_train, y_train, f, x_lims, y_lims, X_plot, x_new=x_train_new,
-                                           filename=filename)
+                            #if k % k_max == 0:
+                            filename = "plots/" + file_prefix + "/model_{}".format(n) + "_{}.svg".format(k)
+                            plot_model(flags, gp, X_train, y_train, f, x_lims, y_lims, X_plot, x_new=x_train_new,
+                                       filename=filename)
 
                             # compute ise, iv, and store values
                             ise_new, iv_new, y_pred, std_pred = compute_ise_and_iv(gp, f, a, b, X_pred)
@@ -123,7 +123,7 @@ if __name__ == "__main__":
                         iv_kernels[fk, n, :]  = iv
 
                 # boxplot over all kernels (with specific learning method)
-                plot_kernel_comparison(ise_kernels, iv_kernels, flags, kernel_labels, fn_prefix, n_random_trials, k_max)
+                # plot_kernel_comparison(ise_kernels, iv_kernels, flags, kernel_labels, fn_prefix, n_random_trials, k_max)
 
             elif surrogate_model == 'nn' and flags[1] == 'variance':
                 continue
