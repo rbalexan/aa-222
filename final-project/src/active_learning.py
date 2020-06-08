@@ -1,8 +1,9 @@
 import numpy as np
+import chaospy
 
 
 # noinspection PyUnusedLocal
-def random_sequence_active_learning(model, f, a, b, X_pred, std_pred, X_train):
+def random_sequence_active_learning(model, f, a, b, X_pred, std_pred, X_train, k):
 
     # hack for 1D
     dims = len(a)
@@ -13,7 +14,31 @@ def random_sequence_active_learning(model, f, a, b, X_pred, std_pred, X_train):
 
 
 # noinspection PyUnusedLocal
-def variance_based_active_learning(model, f, a, b, X_pred, std_pred, X_train):
+def halton_sequence_active_learning(model, f, a, b, X_pred, std_pred, X_train, k):
+
+    distribution = chaospy.J(chaospy.Uniform(a[0], b[0]))
+    samples = distribution.sample(k+1, rule="halton")  # since k = 0 needs one sample
+
+    x_train_new = samples[-1]
+    y_train_new = f(x_train_new)
+
+    return x_train_new, y_train_new
+
+
+# noinspection PyUnusedLocal
+def sobol_sequence_active_learning(model, f, a, b, X_pred, std_pred, X_train, k):
+
+    distribution = chaospy.J(chaospy.Uniform(a[0], b[0]))
+    samples = distribution.sample(k+2, rule="sobol")  # since k = 0 needs one sample that isn't 0.5
+
+    x_train_new = samples[-1]
+    y_train_new = f(x_train_new)
+
+    return x_train_new, y_train_new
+
+
+# noinspection PyUnusedLocal
+def variance_based_active_learning(model, f, a, b, X_pred, std_pred, X_train, k):
 
     x_train_new = X_pred[np.argmax(std_pred)]
     y_train_new = f(x_train_new)
@@ -22,7 +47,7 @@ def variance_based_active_learning(model, f, a, b, X_pred, std_pred, X_train):
 
 
 # noinspection PyUnusedLocal
-def lola_active_learning(model, f, a, b, X_pred, std_pred, X_train):
+def lola_active_learning(model, f, a, b, X_pred, std_pred, X_train, k):
 
     lola_error  = 0.0
     x_train_new = 0.0

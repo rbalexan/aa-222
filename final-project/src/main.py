@@ -1,8 +1,9 @@
 import numpy as np
 import keras
-from sklearn.gaussian_process.kernels import ConstantKernel, RBF, RationalQuadratic, Matern, ExpSineSquared, DotProduct
+from sklearn.gaussian_process.kernels import ConstantKernel, RBF, RationalQuadratic, Matern, DotProduct
 
-from active_learning import variance_based_active_learning, lola_active_learning, random_sequence_active_learning
+from active_learning import variance_based_active_learning, lola_active_learning, random_sequence_active_learning, \
+    halton_sequence_active_learning, sobol_sequence_active_learning
 from benchmark_functions import sinc, hebbal, step, problem15, problem20
 from metrics import compute_ise_and_iv, compute_ise
 from models import fit_gaussian_process, fit_neural_network
@@ -16,19 +17,18 @@ if __name__ == "__main__":
     np.random.seed(0)
 
     # for all f in a list
-    f = hebbal  # f = problem15  # f = sinc         # f = step  # f = hebbal  # f = sinc
-    a = [0]  # a = [-5]       # a = [-5]         # a = [-2]  # a = [0]     # a = [-5]
-    b = [1]  # b = [5]        # b = [15]         # b = [2]   # b = [1]     # b = [5]
-    fn_prefix = "hebbal/"  # "problem15/"   # "sinc_shifted/"  # "step/"   # "hebbal/"   # "sinc/"
+    f = sinc  # f = problem15  # f = sinc         # f = step  # f = hebbal  # f = sinc
+    a = [-5]  # a = [-5]       # a = [-5]         # a = [-2]  # a = [0]     # a = [-5]
+    b = [15]  # b = [5]        # b = [15]         # b = [2]   # b = [1]     # b = [5]
+    fn_prefix = "sinc_shifted/"  # "problem15/"   # "sinc_shifted/"  # "step/"   # "hebbal/"   # "sinc/"
 
     n_random_trials = 5
     k_max = 50
 
     # method sweep
-    #surrogate_models        = ['gp', 'nn']
-    surrogate_models = ['nn']
-    active_learning_methods = [lola_active_learning, random_sequence_active_learning]  # variance_based_active_learning,
-    active_learning_flags   = ['lola', 'random']  # 'variance',
+    surrogate_models        = ['gp', 'nn']
+    active_learning_methods = [halton_sequence_active_learning, sobol_sequence_active_learning]  # [lola_active_learning, random_sequence_active_learning, variance_based_active_learning]
+    active_learning_flags   = ['halton', 'sobol']  # ['lola', 'random', 'variance']
 
     # gp parameters
     kernels = [ConstantKernel(), RBF(), Matern(nu=1/2), Matern(nu=3/2), Matern(nu=5/2), RationalQuadratic(), DotProduct()]

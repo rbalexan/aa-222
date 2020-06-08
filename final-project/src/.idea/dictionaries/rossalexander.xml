@@ -3,6 +3,7 @@
     <words>
       <w>boxplot</w>
       <w>expsinesqr</w>
+      <w>halton</w>
       <w>hebbal</w>
       <w>keras</w>
       <w>leakyrelu</w>
@@ -15,6 +16,7 @@
       <w>relu</w>
       <w>selu</w>
       <w>sinc</w>
+      <w>sobol</w>
       <w>softplus</w>
       <w>sqrd</w>
     </words>
