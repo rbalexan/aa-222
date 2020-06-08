@@ -50,7 +50,14 @@
 	The design of experiments (DOE) is a task that focuses on constructing a sampling scheme that, when sampled, explains the variation of an experiment's output space with respect to its input space. Typically, designers choose to sample according to a dense grid, since it is easy to implement by specifying the upper and lower bounds and resolution of the grid. However, in many technical experimental domains (e.g. hypersonic wind tunnel tests, biological cell assays, particle collider tests, etc.), experiments can be expensive, time-consuming, or impossible to evaluate. Thus, traditional design of experiments utilizing dense sampling schemes is often intractable. In order to make these experiments feasible, we must use a more sample-efficient method to generate our sample set. 
 	
 	% Why is it interesting and important?
-	Sequential design of experiments generalizes traditional design of experiments where we repeatedly construct a surrogate model using the current set of samples and then identify the next sample location using evaluations of the current surrogate model. The proposed sample location is sampled in the experiment or simulation and then added to the set of evaluated samples. This process repeats until the model is assumed accurate or until a maximum number of samples have been evaluated. 
+	Sequential design of experiments generalizes traditional design of experiments where we repeatedly construct a surrogate model using the current set of samples and then identify the next sample location using evaluations of the current surrogate model. The proposed sample location is sampled in the experiment or simulation and then added to the set of evaluated samples. This process repeats until the model is assumed accurate or until a maximum number of samples have been evaluated. This process is depicted in \Cref{fig:sdoe_diagram}
+	
+	\begin{figure}
+	    \centering
+	    %\includesvg{}
+	    \caption{Caption}
+	    \label{fig:sdoe_diagram}
+	\end{figure}
 	
 	% Why is it hard? Why do naive approaches fail?
 	While it is easy to define an approach for sequential design of experiments tasks, there are many challenges in achieving good performance in practice. In particular, the experimental designer must choose a surrogate model that can sufficiently captures the variation in the latent (objective) function in unobserved regions of the input space. Moreover, surrogate models typically require prior knowledge about the behavior of the latent function that may be unavailable. Even more challenging is defining the sequential sampling (active learning) approach so that the surrogate model quickly converges to the latent function. It is important to avoid over-sampling areas of the input space in which there is little variation and also to avoid under-sampling areas of the input space where there is significant nonlinearity.
@@ -58,21 +65,27 @@
 	% What are the key components of my approach and results? Also include any specific limitations. % Summary of the major contributions in bullet form, mentioning in which sections they can be found. This material doubles as an outline of the rest of the paper, saving space and eliminating redundancy.
 	In this work, we focus our attention on examining the choice of surrogate model, the incorporation of prior information in the surrogate model, and the choice of active learning approach. We examine Gaussian process (GP) surrogates and neural network (NN) surrogates due to the expressivity of these models. Additionally, we study the effects of a variety of covariance (kernel) functions for GP surrogates and the effects of two activation functions for NN surrogates. We initialize a sample set using a face-centered central composite design (CCD) along with a single random sample and then perform active learning on a series of one-dimensional test functions. We explore five sampling approaches, including random sampling, Sobol sequence sampling, Halton sequence sampling, variance-based sampling, and local linear approximation (LOLA) sampling.
 	
-	We discuss related work on sequential design of experiments in \Cref{sec:related-work}. In \Cref{sec:background}, we describe several surrogate models and active learning approaches and we elaborate on how these are used in our experiments in \Cref{sec:proposed-approach}. We present the results of several active learning approaches across a variety of surrogate models and test functions in \Cref{sec:experiments-results} and discuss the key findings as they relate to the surrogate models, incorporation of prior information, and active learning approaches in \Cref{sec:conclusion}. In \Cref{sec:future-work} we describe some potential research directions for future work.
+    In \Cref{sec:background}, we describe several surrogate models and active learning approaches and their related work. We then elaborate on how these are used in our experiments in \Cref{sec:proposed-approach}. We present the results of several active learning approaches across a variety of surrogate models and test functions in \Cref{sec:experiments-results} and discuss the key findings as they relate to the selection of surrogate models, incorporation of prior information, and choice of active learning approaches in \Cref{sec:conclusion}. In \Cref{sec:future-work} we describe some potential research directions for future work.
 	
-	\section{Related Work}
-	\label{sec:related-work}
+	\section{Background}
+	\label{sec:background}
 	
-	Full factorial, fractional factorial, central composite design, random sampling, uniform projection, stratified sampling, space filling metrics
-	
-	use of active learning techniques: variance based, LOLA, KFCV, LOOCV, other approaches
+	Design of experiments is a natural part of every experimental domain.
 	
 	disciplines in which activel learning can be used
 	
 	models that can be used: GPs, NNs, DGPs, DNNs, least-squares linear regression, or feature-mapped LSLR
 	
-	\section{Background}
-	\label{sec:background}
+	rational functions \cite{Hendrickx2005SequentialMetamodelling}
+	radial basis functions \cite{Mackman2010InvestigationFunctions}
+	Lipschitzian approaches \cite{Lovison2010AdaptiveMetamodeling}
+	Gaussian process regression \cite{Simpson2001SamplingAnalysis,VanBeers2005KrigingOverview} and deep GPs \cite{Damianou2013DeepProcesses} 
+	neural networks \cite{Eason2014AdaptiveNetworks} and deep neural networks
+	
+	sampling techniques: Full factorial, fractional factorial, central composite design, random sampling, uniform projection, stratified sampling, space filling metrics
+	
+	use of active learning techniques: variance based, LOLA, KFCV, LOOCV, other apprches
+	r
 	
 	Gaussian processes are suitable for modelling small datasets where some prior knowledge of the generative process exists. GPs do require assumptions about the functional form of the underlying response. GPs do not scale well in terms of dimensionality. They may provide well calibrated uncertainty output.
 
