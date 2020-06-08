@@ -52,10 +52,15 @@
 	% Why is it interesting and important?
 	Sequential design of experiments generalizes traditional design of experiments where we repeatedly construct a surrogate model using the current set of samples and then identify the next sample location using evaluations of the current surrogate model. The proposed sample location is sampled in the experiment or simulation and then added to the set of evaluated samples. This process repeats until the model is assumed accurate or until a maximum number of samples have been evaluated. This process is depicted in \Cref{fig:sdoe_diagram}
 	
-	\begin{figure}
+	\begin{figure}[htbp]
 	    \centering
-	    %\includesvg{}
-	    \caption{Caption}
+	    \includesvg[width=0.51\linewidth]{../../src/plots/model_0_0.svg} \hspace*{-1.5em}
+	    \includesvg[width=0.51\linewidth]{../../src/plots/model_0_1.svg}
+	    \includesvg[width=0.51\linewidth]{../../src/plots/model_0_2.svg} \hspace*{-1.5em}
+	    \includesvg[width=0.51\linewidth]{../../src/plots/model_0_3.svg}
+	    \includesvg[width=0.51\linewidth]{../../src/plots/model_0_4.svg} \hspace*{-1.5em}
+	    \includesvg[width=0.51\linewidth]{../../src/plots/model_0_5.svg}
+	    \caption{Six iterations of variance-based active learning on the Hebbal function \cite{hebbal2019bayesian} using a Gaussian process surrogate model with a zero mean function and a rational quadratic covariance function.}
 	    \label{fig:sdoe_diagram}
 	\end{figure}
 	
