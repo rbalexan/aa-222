@@ -268,21 +268,47 @@
 	\section{Experiments \& Results}
 	\label{sec:experiments-results}
 	
-	Computing integrated square error by using 1001 equally spaced points along the interval.
+	We run 50 different random initializations for each Gaussian process surrogate and 5 different random initializations for each neural network surrogate. From the initial sample set (CCD + random) with 4 total samples, we sequentially added 50 samples using the specified sequential sampling approach. We computed the approximate integrated square error by using 1001 equally spaced points along the interval to estimate the integral error between the predicted function and the true function.
 	
-	\begin{figure}[ht]
+	\begin{figure}[bp]
 		\centering
+		\vspace*{-1em}
 		\includesvg[width=\linewidth]{../../src/plots/sinc/gp_variance/kernel_comparison_ise_iter_50_50.svg}
-		\caption{Ablation study of various non-composed covariance functions (kernels) for a Gaussian process with $k=50$ additional samples sequentially selected using variance-based active learning. $n=50$ initial sample schemes using a baseline central composite design (CCD) with a single random sample.}
+		\caption{Integrated squared error of the \textsc{Sinc} function for various Gaussian process kernels with $k=50$ additional samples sequentially selected using variance-based active learning. Mean behavior is computed over $n=50$ random initializations.}
+		\label{fig:gp_var}
 	\end{figure}
 	
+	\begin{figure*}[!h]
+		\centering
+		\includesvg[width=0.37\linewidth]{../../src/plots/sinc/gp_random/kernel_comparison_ise_iter_50_50_gp_random.svg} 
+		\includesvg[width=0.37\linewidth]{../../src/plots/sinc/gp_lola/kernel_comparison_ise_iter_50_50_gp_lola.svg}
+		\includesvg[width=0.37\linewidth]{../../src/plots/sinc/nn_random/activation_comparison_ise_iter_5_50_nn_random.svg}
+		\includesvg[width=0.37\linewidth]{../../src/plots/sinc/nn_lola/activation_comparison_ise_iter_5_50_nn_lola.svg}
+		\caption{Integrated squared error of the \textsc{Sinc} function for various Gaussian process kernels and activation function with $k=50$ additional samples sequentially selected using a random sequence (\textit{left}) and LOLA active learning (\textit{right}). Mean behavior is computed over $n=50$ random initializations for GPs and $n=5$ random initializations for NNs.}
+		\label{fig:comp_random_lola}
+	\end{figure*}
+	\begin{figure*}[!h]
+		\centering
+		\includesvg[width=0.37\linewidth]{../../src/plots/sinc/gp_sobol/kernel_comparison_ise_iter_50_50_gp_sobol.svg}
+		\includesvg[width=0.37\linewidth]{../../src/plots/sinc/gp_halton/kernel_comparison_ise_iter_50_50_gp_halton.svg}
+		\includesvg[width=0.37\linewidth]{../../src/plots/sinc/nn_sobol/activation_comparison_ise_iter_5_50_nn_sobol.svg}
+		\includesvg[width=0.37\linewidth]{../../src/plots/sinc/nn_halton/activation_comparison_ise_iter_5_50_nn_halton.svg}
+		\caption{Integrated squared error of the \textsc{Sinc} function for various Gaussian process kernels and activation function with $k=50$ additional samples sequentially selected using a Sobol sequence (\textit{left}) and a Halton sequence (\textit{right}). Mean behavior is computed over $n=50$ random initializations for GPs and $n=5$ random initializations for NNs. }
+		\label{fig:comp_sobol_halton}
+	\end{figure*}
 	
-	Active learning should be as non-parametric as possible since it should adapt to an unknown objective.
+	Since there are a variety of results, we choose the \textsc{Sinc} function to discuss here. Many results are similar to the results included here.\footnote{Additional plots available on request.} As seen in \Cref{fig:gp_var}, we observe various levels of performance for each GP kernel function, with the squared exponential (RBF) and rational quadratic (RQ) kernels performing best and quickly converging to low ISE. Other kernels that do not describe the behavior of the function can potentially still make progress, but convergence is slower and is not guaranteed. This reinforces our view that active learning using a GP surrogate without prior knowledge of the mean function or covariance function can bring its own particular set of challenges.
+	
+	In \Cref{fig:comp_random_lola}, we compare the GP and NN surrogates on their performance on the \textsc{Sinc} function using a random sequence and using LOLA active learning. It is easy to see that the GP nearly always does better than the NN and that the difference between the ReLU and SELU activation functions is not very significant except for a slight offset in LOLA active learning. We attribute some of the poor performance in the neural network to the non-probabilistic approach which leads to unusual variations in the output space compared to a probabilistic approach. Moreover, the learning rate annealing and early stopping callbacks may have limited our ability to converge to a more optimal neural network. We also observe some interesting and consistent plateaus that can likely be attributed to a stall until obtaining enough samples to learn the proper kernel parameters.
+	
+	For the ISE for the Sobol and Halton sampling sequences (\Cref{fig:comp_sobol_halton}), we see similar behavior. We note that for computational purposes, we skipped training the neural networks in the middle iterations for Sobol and Halton sequences since they are not used for anything and we are mostly interested in the final ISE. As we can see, the final ISE for the NN surrogates using Sobol sequence and Halton sequence sampling is comparable to the final ISE for the NN surrogates using random sequence sampling and LOLA active learning. The sequences give quite consistent performance aside from the random initializations.
 	
 	\section{Conclusion}
 	\label{sec:conclusion}
 	
-	We have shown that GPs are typically more robust surrogate models than NNs for one-dimensional sequential design of experiments problems. While GPs can achieve much lower integrated squared error (ISE) than NNs, this is largely dependent on the choice of kernel function, which may not be able to be selected \textit{a priori}.
+	We have shown that GPs are typically more robust surrogate models than NNs for one-dimensional sequential design of experiments problems. While GPs can achieve much lower integrated squared error (ISE) than NNs, this is largely dependent on the choice of kernel function, which may not be able to be selected \textit{a priori}. If the mean and kernel function can be reasonably estimated beforehand, a GP surrogate with variance-based active learning appears promising for improving sample efficiency. For the NN surrogates, we see little difference in the choice of activation function, except in the LOLA active learning method. Without further study, NN surrogates do not look promising, which can likely be attributed to the small datasets and non-probabilistic approach.
+	
+	Overall, we took on an ambitious project and generated a lot of data and there are many more conclusions to be drawn from the data we have at hand. Through this project I learned a lot about the actual implementation of Gaussian processes and neural networks and how challenging it can be to get them to work.
 	
 	\section{Future Work}
 	\label{sec:future-work}
