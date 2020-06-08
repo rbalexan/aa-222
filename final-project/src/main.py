@@ -17,16 +17,16 @@ if __name__ == "__main__":
     np.random.seed(0)
 
     # for all f in a list
-    f = sinc  # f = problem15  # f = sinc         # f = step  # f = hebbal  # f = sinc
-    a = [-5]  # a = [-5]       # a = [-5]         # a = [-2]  # a = [0]     # a = [-5]
-    b = [15]  # b = [5]        # b = [15]         # b = [2]   # b = [1]     # b = [5]
-    fn_prefix = "sinc_shifted/"  # "problem15/"   # "sinc_shifted/"  # "step/"   # "hebbal/"   # "sinc/"
+    f = step  # f = problem15  # f = sinc         # f = step  # f = hebbal  # f = sinc
+    a = [-2]  # a = [-5]       # a = [-5]         # a = [-2]  # a = [0]     # a = [-5]
+    b = [2]  # b = [5]        # b = [15]         # b = [2]   # b = [1]     # b = [5]
+    fn_prefix = "step/"  # "problem15/"   # "sinc_shifted/"  # "step/"   # "hebbal/"   # "sinc/"
 
-    n_random_trials = 5
+    n_random_trials = 50
     k_max = 50
 
     # method sweep
-    surrogate_models        = ['gp', 'nn']
+    surrogate_models        = ['gp']
     active_learning_methods = [halton_sequence_active_learning, sobol_sequence_active_learning]  # [lola_active_learning, random_sequence_active_learning, variance_based_active_learning]
     active_learning_flags   = ['halton', 'sobol']  # ['lola', 'random', 'variance']
 
@@ -105,7 +105,7 @@ if __name__ == "__main__":
                             #print("Iteration %2.0i | ISE: %8.2e  | IV: %8.2e" % (k, ise[-1], iv[-1]))
 
                             # get new sample using active learning method
-                            x_train_new, y_train_new = active_learning_method(gp, f, a, b, X_pred, std_pred, X_train)
+                            x_train_new, y_train_new = active_learning_method(gp, f, a, b, X_pred, std_pred, X_train, k)
 
                             # append new sample to training data
                             X_train = np.append(X_train, x_train_new.reshape(1, -1), axis=0)
@@ -155,10 +155,11 @@ if __name__ == "__main__":
                                 y_train = y_train_init
 
                             # re-fit model
-                            nn = fit_neural_network(X_train, y_train, hidden_units, activation, epochs, callbacks)
+                            if k == k_max or k == 0:
+                                nn = fit_neural_network(X_train, y_train, hidden_units, activation, epochs, callbacks)
 
                             # plot if desired
-                            if k % k_max == 0:
+                            if k == k_max:
                                 filename = "plots/" + file_prefix + "/{}".format(n) + "_{}.svg".format(k)
                                 plot_model(flags, nn, X_train, y_train, f, x_lims, y_lims, X_plot, x_new=x_train_new,
                                            filename=filename)
@@ -169,7 +170,7 @@ if __name__ == "__main__":
                             print("Iteration %2.0i | ISE: %8.2e" % (k, ise[-1]))
 
                             # get new sample using active learning method
-                            x_train_new, y_train_new = active_learning_method(nn, f, a, b, X_pred, [], X_train)
+                            x_train_new, y_train_new = active_learning_method(nn, f, a, b, X_pred, [], X_train, k)
 
                             # append new sample to training data
                             X_train = np.append(X_train, x_train_new.reshape(1, -1), axis=0)
