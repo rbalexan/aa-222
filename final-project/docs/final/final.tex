@@ -1,4 +1,4 @@
-\documentclass[conference]{IEEEtran}
+\documentclass[conference,final]{IEEEtran}
 
 \IEEEoverridecommandlockouts
 
@@ -41,7 +41,7 @@
 	\maketitle
 	
 	\begin{abstract}
-		The design of experiments is the task of designing a one-shot sampling scheme over the input space that will efficiently capture variation in the output space. While a static, dense sampling scheme is often easy to design and execute, for many experiments, the cost of evaluating such a sample set can be expensive, time-consuming, or even impossible. In order to improve sample efficiency, we examine the sequential design of experiments, where the task consists of alternating between constructing a surrogate model using the current set of samples and identifying the next sample location utilizing information from the surrogate model. We compare three traditional sampling techniques against two active learning techniques on both Gaussian process (GP) and artificial neural network (NN) surrogate models across a variety of one-dimensional test functions. We find that GP surrogates outperform NN surrogates in sequential design of experiments tasks where the number of samples is limited and when prior information about the latent function can be incorporated into the GP.
+		The design of experiments is the task of designing a one-shot sampling scheme over the input space that will efficiently capture variation in the output space. While a static, dense sampling scheme is often easy to design and execute, for many experiments, the cost of evaluating such a sample set can be expensive, time-consuming, or even impossible. To improve sample efficiency, we examine the sequential design of experiments, where the task consists of alternating between constructing a surrogate model using the current set of samples and identifying the next sample location utilizing information from the surrogate model. We compare three traditional sampling techniques against two active learning techniques on both Gaussian process (GP) and artificial neural network (NN) surrogate models across a variety of one-dimensional test functions. We find that GP surrogates outperform NN surrogates in sequential design of experiments tasks where the number of samples is limited and when prior information about the latent function can be incorporated into the GP.
 	\end{abstract}
 	
 	\section{Introduction}
@@ -51,7 +51,7 @@
 	The design of experiments (DOE) is a task that focuses on constructing a sampling scheme that, when sampled, explains the variation of an experiment's output space with respect to its input space. Typically, designers choose to sample according to a dense grid, since it is easy to implement by specifying the upper and lower bounds and resolution of the grid. However, in many technical experimental domains (e.g. hypersonic wind tunnel tests, biological cell assays, particle collider tests, etc.), experiments can be expensive, time-consuming, or impossible to evaluate. Thus, traditional design of experiments utilizing dense sampling schemes is often intractable. In order to make these experiments feasible, we must use a more sample-efficient method to generate our sample set. 
 	
 	% Why is it interesting and important?
-	Sequential design of experiments generalizes traditional design of experiments where we repeatedly construct a surrogate model using the current set of samples and then identify the next sample location using evaluations of the current surrogate model. The proposed sample location is sampled in the experiment or simulation and then added to the set of evaluated samples. This process repeats until the model is assumed accurate or until a maximum number of samples have been evaluated. This process is depicted in \Cref{fig:sdoe_diagram}
+	Sequential design of experiments generalizes traditional design of experiments where we repeatedly construct a surrogate model using the current set of samples and then identify the next sample location using evaluations of the current surrogate model. The proposed sample location is sampled in the experiment or simulation and then added to the set of evaluated samples. This process repeats until the model is assumed accurate or until a maximum number of samples have been evaluated. This process is depicted in \Cref{fig:sdoe_diagram}.
 	
 	\begin{figure}[htbp]
 	    \centering
@@ -67,7 +67,7 @@
 	\end{figure}
 	
 	% Why is it hard? Why do naive approaches fail?
-	While it is easy to define an approach for sequential design of experiments tasks, there are many challenges in achieving good performance in practice. In particular, the experimental designer must choose a surrogate model that can sufficiently captures the variation in the latent (objective) function in unobserved regions of the input space. Moreover, surrogate models typically require prior knowledge about the behavior of the latent function that may be unavailable. Even more challenging is defining the sequential sampling (active learning) approach so that the surrogate model quickly converges to the latent function. It is important to avoid over-sampling areas of the input space in which there is little variation and also to avoid under-sampling areas of the input space where there is significant nonlinearity.
+	While it is easy to define an approach for sequential design of experiments tasks, there are many practical challenges in achieving good performance. In particular, the experimental designer must choose a surrogate model that can sufficiently capture the variation in the latent (objective) function in unobserved regions of the input space. Moreover, surrogate models typically require prior knowledge about the behavior of the latent function that may be unavailable. Even more challenging is defining the sequential sampling (active learning) approach so that the surrogate model quickly converges to the latent function. It is important to avoid over-sampling areas of the input space in which there is little variation and also to avoid under-sampling areas of the input space where there is significant nonlinearity.
 	
 	% What are the key components of my approach and results? Also include any specific limitations. % Summary of the major contributions in bullet form, mentioning in which sections they can be found. This material doubles as an outline of the rest of the paper, saving space and eliminating redundancy.
 	In this work, we focus our attention on examining the choice of surrogate model, the incorporation of prior information in the surrogate model, and the choice of active learning approach. We examine Gaussian process (GP) surrogates and neural network (NN) surrogates due to the expressivity of these models. Additionally, we study the effects of a variety of covariance (kernel) functions for GP surrogates and the effects of two activation functions for NN surrogates. We initialize a sample set using a face-centered central composite design (CCD) along with a single random sample and then perform active learning on a series of one-dimensional test functions. We explore five sampling approaches, including random sampling, Sobol sequence sampling, Halton sequence sampling, variance-based sampling, and local linear approximation (LOLA) sampling.
@@ -84,7 +84,7 @@
 	\subsubsection{Static Sampling Techniques}
 	Static sampling techniques are essentially one-shot sampling schemes. The most widely known is the full factorial sampling scheme, which gives a dense grid over the input space. Full factorial sampling requires a number of samples that is exponential with the number of dimensions, which can be prohibitive. Another approach called fractional factorial sampling seeks to reduce the sample complexity \cite{george2005statistics}. 
 	
-	Due to the exponential sample complexity of dense factorial sampling plans, sparse sampling plans were developed with better sample complexities. Uniform projection sampling plans sparsely generate samples over a uniform grid such that the projections of the sample set is uniform along each dimension \cite{Kochenderfer2019AlgorithmsOptimization}. While uniform projection plans can be useful, they can sometimes fill the input space poorly (consider a diagonal in two-dimensional grid). To improve on this, some low-discrepancy (space-filling) quasi-random sequences, such as the Sobol sequence and the Halton sequence serve as useful alternatives \cite{Sobol1967OnIntegrals,Halton1964AlgorithmSequence}. Sample sequences from second-order (two-dimensional) Sobol and Halton sequences are shown in \Cref{fig:sobol_halton}.
+	Due to the exponential sample complexity of dense factorial sampling plans, sparse sampling plans were developed with better sample complexities. Uniform projection sampling plans sparsely generate samples over a uniform grid such that the projections of the sample set are uniform along each dimension \cite{Kochenderfer2019AlgorithmsOptimization}. While uniform projection plans can be useful, they can sometimes fill the input space poorly (consider a diagonal in a two-dimensional grid). To improve on this, some low-discrepancy (space-filling) quasi-random sequences, such as the Sobol sequence and the Halton sequence serve as useful alternatives \cite{Sobol1967OnIntegrals,Halton1964AlgorithmSequence}. Sample sequences from second-order (two-dimensional) Sobol and Halton sequences are shown in \Cref{fig:sobol_halton}.
 	
 	\begin{figure}[htbp]
 	    \centering
@@ -159,7 +159,7 @@
 	\end{figure*}
 	
 	\begin{table*}[htbp]
-    \renewcommand{\arraystretch}{1.6}
+    \renewcommand{\arraystretch}{2.0}
     \centering
     \caption{Test Functions}
     \label{tab:test_fns}
@@ -178,7 +178,7 @@
 	
 	We consider six different one-dimensional test functions (\Cref{tab:test_fns}) due to the simplicity of implementing active learning approaches in one dimension. Future work could include extending some of the active learning methods to two or more dimensions.
 	
-	The first function is the \textsc{Hebbal} function, which displays heteroscedastic behavior that would be difficult for a GP to learn. The \textsc{Hebbal} function is a modified version of the Xiong function that was studied by Hebbal et al. \cite{hebbal2019bayesian}. The second and third problems (\textsc{Problem15} and \textsc{Problem20}) are two homoscedastic optimization test functions with smooth behavior \cite{1-DFunctions}. Finally, the last three functions are test function we chose to study due to the contrast they provide with the other functions. The \textsc{Sinc} function is highly oscillatory, with a large peak near the origin, and an altered domain (\textsc{SincShifted}) could change the perceived covariance. The \textsc{Step} function is purely pathological, but worth studying due to the discontinuity. 
+	The first function is the \textsc{Hebbal} function, which displays heteroscedastic behavior that would be difficult for a GP to learn. The \textsc{Hebbal} function is a modified version of the Xiong function that was studied by Hebbal et al. \cite{hebbal2019bayesian}. The second and third problems (\textsc{Problem15} and \textsc{Problem20}) are two homoscedastic optimization test functions with smooth behavior \cite{1-DFunctions}. Finally, the last three functions are test function we chose to study due to the contrast they provide with the other functions. The \textsc{Sinc} function is highly oscillatory, with a large peak near the origin, and an altered domain (\textsc{SincShifted}) could change the perceived covariance. The \textsc{Step} function is purely pathological but worth studying due to the discontinuity. 
 	
 	\subsection{Surrogate Models}
 	
@@ -204,7 +204,7 @@
 	
 	Using the dataset of input-output pairs, we fit a Gaussian process by minimizing the log-marginal-likelihood of the mean function and covariance function parameters given the dataset. For the minimization, we use the limited-memory Broyden-Fletcher-Goldfarb-Shanno with bound constraints optimizer (\textsc{L-BFGS-B}).
 	
-	While GPs are non-parametric estimators, they require specifying a prior over the GP, given by the mean function $m(\boldsymbol{x})$ and the covariance function $k(\boldsymbol{x}, \boldsymbol{x}')$. The choice of mean function and covariance function is non-trivial and can greatly influence the resulting distribution over the latent function. Typically, prior knowledge about behavior of the latent function over the design space is utilized in constructing the mean function and covariance function.
+	While GPs are non-parametric estimators, they require specifying a prior over the GP, given by the mean function $m(\boldsymbol{x})$ and the covariance function $k(\boldsymbol{x}, \boldsymbol{x}')$. The choice of mean function and covariance function is non-trivial and can greatly influence the resulting distribution over the latent function. Typically, prior knowledge about the behavior of the latent function over the design space is utilized in constructing the mean function and covariance function.
 	
 	For convenience, we assume a zero mean function. In our experiments across all active learning methods, we examine a variety of standard, non-composed, isotropic kernel functions. In particular, we examine the constant, dot product, squared exponential (RBF), rational quadratic, and Mat\'ern ($\nu = \{\tfrac{1}{2}, \tfrac{3}{2}, \tfrac{5}{2}\}$) kernel functions, which are listed in \Cref{tab:gp_kernels}, where $\Gamma$ is the gamma function and $K_\nu$ is the Bessel function of order $\nu$. 
 	
@@ -214,16 +214,7 @@
 	
 	The neural network and optimizer hyperparameters are listed in \Cref{tab:nn_hyperparams}. We note that the choice of a single-layer shallow neural network rather than a deep neural network is to achieve a fair comparison with the shallow GP. Despite this limitation, it was shown in the universal approximation theorem \cite{Cybenko1989ApproximationFunction} that a single-layer feed-forward neural network with a finite number of hidden units can approximate continuous functions with up to an arbitrary degree of precision. We select 64 hidden units since it appears to give good function approximations. We also examine both the rectified linear unit (ReLU) \cite{Nair2010RectifiedMachines} and scaled exponential linear unit (SELU) \cite{Klambauer2017Self-normalizingNetworks} activation functions, depicted in \Cref{fig:activ_fns} and given in the following equations, where $\alpha$ and $\lambda$ are scaling parameters for the SELU activation function.
 	
-	\begin{align*}
-	    \text{ReLU}(x) &= \max(0, x) \\
-	    \text{SELU}(\alpha, x) &= \lambda 
-	        \begin{cases}
-                \alpha (e^x - 1) & \text{if $x < 0$} \\
-                x & \text{if $x \ge 0$}
-            \end{cases}   
-	\end{align*}
-	
-	\begin{table}[htbp]
+	\begin{table}[!t]
     \renewcommand{\arraystretch}{1.0}
     \centering
     \caption{Neural Network and Optimizer Hyperparameters}
@@ -254,12 +245,21 @@
 	    \caption{The rectified linear unit (ReLU) and scaled exponential linear unit (SELU) activation functions (SELU: $\alpha = 1$, $\lambda =1$). While ReLU is separably linear with straightforward gradients for positive and negative inputs, SELU is nonlinear and has a more complex gradient for negative inputs.}
 	    \label{fig:activ_fns}
 	\end{figure}
+	\vspace*{-1em}
+	\begin{align}
+	    \text{ReLU}(x) &= \max(0, x) \\
+	    \text{SELU}(\alpha, x) &= \lambda 
+	        \begin{cases}
+                \alpha (e^x - 1) & \text{if $x < 0$} \\
+                x & \text{if $x \ge 0$}
+            \end{cases}   
+	\end{align}
 	
-	Since our neural network has only a single hidden layer, we simply want to investigate the difference between a piecewise linear activation function and nonlinear activation function. Providing pure nonlinearity (rather than piecewise linearity) will enable the single-layer neural network to generate a much smoother approximation that varies between training examples when the dataset is small. This variation can be exploited to improve learning and is discussed further in the results. Using both the rectified linear unit (ReLU) and scaled exponential linear unit (SELU) activation functions, we train for a maximum of 10,000 epochs with an initial learning rate of 0.01, that is reduced by a factor of 0.5 if there are no improvements for 500 epochs. Additionally, we stop early if there is no improvement greater that 1E-6 for 1500 epochs.
+	Since our neural network has only a single hidden layer, we simply want to investigate the difference between a piecewise linear activation function and a nonlinear activation function. Providing pure nonlinearity (rather than piecewise linearity) will enable the single-layer neural network to generate a much smoother approximation that varies between training examples when the dataset is small. This variation can be exploited to improve learning and is discussed further in the results. Using both the rectified linear unit (ReLU) and scaled exponential linear unit (SELU) activation functions, we train for a maximum of 10,000 epochs with an initial learning rate of 0.01, which is reduced by a factor of 0.5 if there are no improvements for 500 epochs. Additionally, we stop early if there is no improvement greater than 1E-6 for 1500 epochs.
 	
 	\subsection{Initial Sampling Scheme}
 	
-	Typically, using a random initialization would make sense, however, this tends to lead to excessive exploration near the boundaries of the the design space. To mitigate this, we make use of the face-centered central composite design (CCD, or CCF) sampling scheme, which is essentially a full factorial grid over the design space, but with $m=3$ samples along each dimension \cite{CentralCCD}. Once we have obtained these samples, we also add a single random sample to seed the learning of the metamodel. While adding a single random sample is not necessary, it helps us quantify the robustness of active learning approaches.
+	Typically, using a random initialization would make sense, however, this tends to lead to excessive exploration near the boundaries of the design space. To mitigate this, we make use of the face-centered central composite design (CCD, or CCF) sampling scheme, which is essentially a full factorial grid over the design space, but with $m=3$ samples along each dimension \cite{CentralCCD}. Once we have obtained these samples, we also add a single random sample to seed the learning of the metamodel. While adding a single random sample is not necessary, it helps us quantify the robustness of active learning approaches.
 	
 	\subsection{Sequential Sampling Methods}
 	
@@ -268,7 +268,7 @@
 	\section{Experiments \& Results}
 	\label{sec:experiments-results}
 	
-	We run 50 different random initializations for each Gaussian process surrogate and 5 different random initializations for each neural network surrogate. From the initial sample set (CCD + random) with 4 total samples, we sequentially added 50 samples using the specified sequential sampling approach. We computed the approximate integrated square error by using 1001 equally spaced points along the interval to estimate the integral error between the predicted function and the true function.
+	We run 50 different random initializations for each Gaussian process surrogate and 5 different random initializations for each neural network surrogate. From the initial sample set (CCD + random) with 4 total samples, we sequentially added 50 samples using the specified sequential sampling approach. We computed the approximate integrated squared error (ISE) by using 1001 equally spaced points along the interval to estimate the integral error between the predicted function and the true function.
 	
 	\begin{figure}[bp]
 		\centering
@@ -278,7 +278,7 @@
 		\label{fig:gp_var}
 	\end{figure}
 	
-	\begin{figure*}[!h]
+	\begin{figure*}[ht]
 		\centering
 		\includesvg[width=0.37\linewidth]{../../src/plots/sinc/gp_random/kernel_comparison_ise_iter_50_50_gp_random.svg} 
 		\includesvg[width=0.37\linewidth]{../../src/plots/sinc/gp_lola/kernel_comparison_ise_iter_50_50_gp_lola.svg}
@@ -287,7 +287,7 @@
 		\caption{Integrated squared error of the \textsc{Sinc} function for various Gaussian process kernels and activation function with $k=50$ additional samples sequentially selected using a random sequence (\textit{left}) and LOLA active learning (\textit{right}). Mean behavior is computed over $n=50$ random initializations for GPs and $n=5$ random initializations for NNs.}
 		\label{fig:comp_random_lola}
 	\end{figure*}
-	\begin{figure*}[!h]
+	\begin{figure*}[!ht]
 		\centering
 		\includesvg[width=0.37\linewidth]{../../src/plots/sinc/gp_sobol/kernel_comparison_ise_iter_50_50_gp_sobol.svg}
 		\includesvg[width=0.37\linewidth]{../../src/plots/sinc/gp_halton/kernel_comparison_ise_iter_50_50_gp_halton.svg}
@@ -297,23 +297,23 @@
 		\label{fig:comp_sobol_halton}
 	\end{figure*}
 	
-	Since there are a variety of results, we choose the \textsc{Sinc} function to discuss here. Many results are similar to the results included here.\footnote{Additional plots available on request.} As seen in \Cref{fig:gp_var}, we observe various levels of performance for each GP kernel function, with the squared exponential (RBF) and rational quadratic (RQ) kernels performing best and quickly converging to low ISE. Other kernels that do not describe the behavior of the function can potentially still make progress, but convergence is slower and is not guaranteed. This reinforces our view that active learning using a GP surrogate without prior knowledge of the mean function or covariance function can bring its own particular set of challenges.
+	Since there are a variety of results, many of which are similar, we choose the \textsc{Sinc} function to discuss here. As depicted in \Cref{fig:gp_var}, as we add samples using Gaussian process variance-based active learning, the surrogate model ISE decreases. We observe various levels of performance for each GP kernel function, with the squared exponential (RBF) and rational quadratic (RQ) kernels performing best and quickly converging to low ISE. Other kernels that do not describe the behavior of the function can potentially still make progress, but convergence is slower and is not guaranteed. This reinforces our view that active learning using a GP surrogate without prior knowledge of the mean function or covariance function can bring its own particular set of challenges.
 	
 	In \Cref{fig:comp_random_lola}, we compare the GP and NN surrogates on their performance on the \textsc{Sinc} function using a random sequence and using LOLA active learning. It is easy to see that the GP nearly always does better than the NN and that the difference between the ReLU and SELU activation functions is not very significant except for a slight offset in LOLA active learning. We attribute some of the poor performance in the neural network to the non-probabilistic approach which leads to unusual variations in the output space compared to a probabilistic approach. Moreover, the learning rate annealing and early stopping callbacks may have limited our ability to converge to a more optimal neural network. We also observe some interesting and consistent plateaus that can likely be attributed to a stall until obtaining enough samples to learn the proper kernel parameters.
 	
-	For the ISE for the Sobol and Halton sampling sequences (\Cref{fig:comp_sobol_halton}), we see similar behavior. We note that for computational purposes, we skipped training the neural networks in the middle iterations for Sobol and Halton sequences since they are not used for anything and we are mostly interested in the final ISE. As we can see, the final ISE for the NN surrogates using Sobol sequence and Halton sequence sampling is comparable to the final ISE for the NN surrogates using random sequence sampling and LOLA active learning. The sequences give quite consistent performance aside from the random initializations.
+	For the ISE for the Sobol and Halton sampling sequences (\Cref{fig:comp_sobol_halton}), we see similar behavior, where the final ISE for the NN surrogates using Sobol sequence and Halton sequence sampling is comparable to the final ISE for the NN surrogates using random sequence sampling and LOLA active learning. The sequences give quite consistent performance aside from the random initializations.
 	
 	\section{Conclusion}
 	\label{sec:conclusion}
 	
-	We have shown that GPs are typically more robust surrogate models than NNs for one-dimensional sequential design of experiments problems. While GPs can achieve much lower integrated squared error (ISE) than NNs, this is largely dependent on the choice of kernel function, which may not be able to be selected \textit{a priori}. If the mean and kernel function can be reasonably estimated beforehand, a GP surrogate with variance-based active learning appears promising for improving sample efficiency. For the NN surrogates, we see little difference in the choice of activation function, except in the LOLA active learning method. Without further study, NN surrogates do not look promising, which can likely be attributed to the small datasets and non-probabilistic approach.
+	We have shown that GPs are typically more robust surrogate models than NNs for one-dimensional sequential design of experiments problems. While GPs can achieve much lower integrated squared error (ISE) than NNs, this is largely dependent on the choice of the kernel function, which may not be able to be selected \textit{a priori}. If the mean and kernel function can be reasonably estimated beforehand, a GP surrogate with variance-based active learning appears promising for improving sample efficiency. For the NN surrogates, we see little difference in the choice of activation function, except in the LOLA active learning method. Without further study, NN surrogates do not look promising, which can likely be attributed to the small datasets and non-probabilistic approach.
 	
-	Overall, we took on an ambitious project and generated a lot of data and there are many more conclusions to be drawn from the data we have at hand. Through this project I learned a lot about the actual implementation of Gaussian processes and neural networks and how challenging it can be to get them to work.
+	Overall, we took on an ambitious project and generated a lot of data and there are many more conclusions to be drawn from the data we have at hand. Through this project, I learned a lot about the implementation of Gaussian processes and neural networks and how challenging it can be to get them to work.
 	
 	\section{Future Work}
 	\label{sec:future-work}
 	
-	In the future, it would be interesting to implement the local linear approximation (LOLA) and $k$-fold cross validation (KFCV) active learning methods in multiple dimensions to begin to look at the scalability of GPs and NNs. Another important direction for future work is also the extension of the experiments to deep Gaussian processes (DGPs) and deep neural networks (DNNs) \cite{Damianou2013DeepProcesses}. The expressivity and principled composability of DGPs and DNNs may lead to significant improvements over their shallow counterparts in cases when there are sufficiently large datasets. We foresee great improvement particularly in high-dimensional spaces, where large dataset will be necessary in order to efficiently construct a surrogate model that can capture the underlying variation in the latent function. An interesting application of ongoing research could be to implement and examine the performance of the neural network Gaussian process (NNGP), which uses a neural network kernel function to model the prediction process of a Bayesian neural network (BNN).
+	In the future, it would be interesting to implement the local linear approximation (LOLA) and $k$-fold cross-validation (KFCV) active learning methods in multiple dimensions to begin to look at the scalability of GPs and NNs. Another important direction for future work is also the extension of the experiments to deep Gaussian processes (DGPs) and deep neural networks (DNNs) \cite{Damianou2013DeepProcesses}. The expressivity and principled composability of DGPs and DNNs may lead to significant improvements over their shallow counterparts in cases when there are sufficiently large datasets. We foresee vast improvement particularly in high-dimensional spaces, where large datasets will be necessary to efficiently construct a surrogate model that can capture the underlying variation in the latent function. An interesting application of ongoing research could be to implement and examine the performance of the neural network Gaussian process (NNGP), which uses a neural network kernel function to model the prediction process of a Bayesian neural network (BNN).
 	
 	\bibliographystyle{IEEEtran}
 	\bibliography{final}
